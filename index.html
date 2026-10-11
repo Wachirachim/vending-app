@@ -14,7 +14,7 @@ body[data-theme="black"]{--bg:#09090b;--card:#18181b;--sub:#27272a;--text:#f4f4f
 body[data-theme="pink"]{--bg:#fff1f2;--card:#fff;--sub:#ffe4e6;--text:#4c0519;--mut:#9f1239;--bdr:#fecdd3;--pri:#e11d48;--pri-h:#be123c;--in:#fff}
 body[data-theme="gray"]{--bg:#1e293b;--card:#334155;--sub:#475569;--text:#f8fafc;--mut:#cbd5e1;--bdr:#475569;--pri:#38bdf8;--pri-h:#0ea5e9;--in:#243247}
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Prompt','Sarabun',sans-serif;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg);color:var(--text);padding:14px;line-height:1.5;transition:background .2s,color .2s;min-height:100vh}
+body{background:var(--bg);color:var(--text);padding:14px;padding-bottom:50px;line-height:1.5;transition:background .2s,color .2s;min-height:100vh}
 .container{max-width:600px;margin:0 auto}
 .top-bar{display:flex;flex-direction:column;align-items:center;margin-bottom:14px;gap:8px;text-align:center}
 .stats-box{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:8px 14px;width:100%;max-width:420px;margin:4px auto;box-shadow:0 2px 8px rgba(0,0,0,.04);text-align:center}
@@ -33,7 +33,7 @@ body{background:var(--bg);color:var(--text);padding:14px;line-height:1.5;transit
 .card-title{font-size:1rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px}
 .form-group{margin-bottom:10px}
 label{display:block;font-size:.82rem;font-weight:600;margin-bottom:4px;color:var(--mut)}
-input[type="text"],select{width:100%;padding:10px 12px;border:1px solid var(--bdr);background:var(--in);color:var(--text);border-radius:10px;font-size:.95rem;outline:none}
+input[type="text"],input[type="number"],select{width:100%;padding:10px 12px;border:1px solid var(--bdr);background:var(--in);color:var(--text);border-radius:10px;font-size:.95rem;outline:none}
 .upload-grid-2,.upload-grid-4{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
 .upload-box{border:2px dashed var(--bdr);border-radius:12px;padding:12px 6px;text-align:center;background:var(--sub);position:relative;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .upload-box input[type="file"]{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer}
@@ -50,10 +50,46 @@ canvas{display:block;width:100%;height:auto}
 .palette-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .color-chip{width:32px;height:32px;border-radius:8px;cursor:pointer;border:2px solid var(--bdr)}
 .color-chip.active{border-color:var(--pri);transform:scale(1.1)}
+
+/* Secret Calendar Button */
+.secret-btn-wrap{display:flex;justify-content:center;margin-top:24px;padding:10px;}
+.secret-cal-btn{background:none;border:none;font-size:1.1rem;cursor:pointer;opacity:0.4;transition:opacity .2s;padding:6px;border-radius:50%}
+.secret-cal-btn:hover{opacity:0.9;transform:scale(1.1)}
+
+/* Calendar View */
+#calView{display:none}
+.cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.cal-nav-btn{background:var(--sub);color:var(--text);border:1px solid var(--bdr);padding:6px 12px;border-radius:8px;cursor:pointer;font-weight:700}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.cal-day-head{font-size:0.75rem;font-weight:700;color:var(--mut);padding:6px 0}
+.cal-cell{background:var(--sub);border:1px solid var(--bdr);border-radius:8px;padding:6px 2px;min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;cursor:pointer;transition:transform .1s}
+.cal-cell:active{transform:scale(0.95)}
+.cal-cell.empty{background:transparent;border-color:transparent;cursor:default}
+.cal-cell.today{border-color:var(--pri);font-weight:800}
+.cal-cell-num{font-size:0.85rem;font-weight:700;line-height:1}
+.dots-row{display:flex;gap:3px;margin-top:4px;flex-wrap:wrap;justify-content:center}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.dot-green{background:#22c55e}
+.dot-orange{background:#f97316}
+.dot-gray{background:var(--mut);opacity:0.3}
+
+/* Modal */
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:none;justify-content:center;align-items:center;z-index:9999;padding:14px}
+.modal-card{background:var(--card);border:1px solid var(--bdr);border-radius:18px;max-width:440px;width:100%;max-height:90vh;overflow-y:auto;padding:18px;box-shadow:0 8px 30px rgba(0,0,0,0.3)}
+.modal-title{font-size:1.05rem;font-weight:800;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.machine-block{background:var(--sub);border:1px solid var(--bdr);border-radius:12px;padding:10px;margin-bottom:10px}
+.machine-block h4{font-size:0.88rem;color:var(--pri);margin-bottom:6px}
+.round-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.round-row span{font-size:0.8rem;min-width:50px;color:var(--mut)}
+.round-row input{padding:6px 8px;font-size:0.85rem}
+.summary-stat{background:var(--sub);border:1px solid var(--bdr);border-radius:12px;padding:12px;margin-top:14px}
+.summary-stat table{width:100%;border-collapse:collapse;font-size:0.82rem;margin-top:6px}
+.summary-stat th,.summary-stat td{padding:5px 6px;text-align:left;border-bottom:1px solid var(--bdr)}
+.summary-stat th{color:var(--mut)}
 </style>
 </head>
 <body data-theme="brown">
-<div class="container">
+<div class="container" id="mainToolView">
   <div class="top-bar">
     <div>
       <p style="font-size:0.85rem;font-weight:700;color:var(--text)">จัดทำโดย Wachira Chimraroeng</p>
@@ -86,7 +122,6 @@ canvas{display:block;width:100%;height:auto}
 
   <!-- TAB 4 รูป & หลายรูป Auto Grid -->
   <div id="tab4" class="tab-panel active">
-    <!-- กล่อง 1: รวม 4 รูปมาตรฐาน -->
     <div class="card">
       <div class="card-title">📸 1. รวม 4 รูป (2x2 มาตรฐาน)</div>
       <label class="btn btn-batch" style="cursor:pointer">⚡ กดที่นี่เพื่อเลือก 4 รูปพร้อมกันทีเดียว
@@ -109,7 +144,7 @@ canvas{display:block;width:100%;height:auto}
       <button class="btn btn-success" onclick="downloadImage('canvas4','txt4_name','รายงาน_4รูป')">💾 บันทึกรูป 4 ช่อง (PNG)</button>
     </div>
 
-    <!-- กล่อง 2: รวมหลายรูป Auto Grid (ใส่กี่รูปก็ได้ 1-10+ รูป จัดตารางอัตโนมัติ) -->
+    <!-- Auto Grid -->
     <div class="card" style="border: 2px dashed var(--pri);">
       <div class="card-title">🧩 2. รวมรูป Auto Grid (ใส่กี่รูปก็ได้ 1-10+ รูป)</div>
       <p style="font-size:0.82rem;color:var(--mut);margin-bottom:10px;">
@@ -123,7 +158,6 @@ canvas{display:block;width:100%;height:auto}
         <div id="multiCountText" style="color:var(--pri);font-size:.82rem;font-weight:700;margin-top:4px"></div>
       </div>
 
-      <!-- ตัวเลือกสีพื้นหลังรูป -->
       <label>🎨 สีพื้นหลังรูป (ช่องว่างระหว่างรูป)</label>
       <div class="palette-row">
         <div class="color-chip active" style="background:#ffffff" onclick="setMultiBg('#ffffff', this)" title="ขาว"></div>
@@ -136,7 +170,6 @@ canvas{display:block;width:100%;height:auto}
         </button>
       </div>
 
-      <!-- ตัวเลือกตำแหน่งข้อความ -->
       <div class="form-group">
         <label>📍 ตำแหน่งข้อความ</label>
         <select id="selTextPos">
@@ -201,7 +234,6 @@ canvas{display:block;width:100%;height:auto}
         ▶️ เปิดฟังบนแอป YouTube (ช่วยนับยอดวิวเต็มๆ)
       </a>
 
-      <!-- แถบปุ่มควบคุมเพลง: เล่น/หยุด, ปิด/เปิดเสียง, สุ่ม, ถัดไป -->
       <div class="ctrl-grid">
         <button class="btn" id="btnPlayPause" style="background:var(--sub);color:var(--text);border:1px solid var(--bdr);" onclick="togglePlayMusic()">
           ▶️ เล่นเพลง
@@ -217,7 +249,6 @@ canvas{display:block;width:100%;height:auto}
         </button>
       </div>
 
-      <!-- กรอบแสดงวิดีโอ YouTube -->
       <div class="video-wrap">
         <div id="ytPlayerBox"></div>
       </div>
@@ -226,9 +257,280 @@ canvas{display:block;width:100%;height:auto}
       </p>
     </div>
   </div>
+
+  <!-- Secret Button Bottom -->
+  <div class="secret-btn-wrap">
+    <button class="secret-cal-btn" onclick="openPasscodePrompt()" title="ตารางปฏิทิน">📅</button>
+  </div>
+</div>
+
+<!-- ==================== CALENDAR DASHBOARD VIEW ==================== -->
+<div class="container" id="calView">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+    <button class="btn" style="width:auto;padding:8px 14px;background:var(--sub);color:var(--text);border:1px solid var(--bdr);" onclick="exitCalendar()">
+      ↩️ กลับหน้าหลัก
+    </button>
+    <span style="font-size:0.9rem;font-weight:700;color:var(--pri);">🔒 ปฏิทินรอบเติมตู้ (V8 & V9)</span>
+  </div>
+
+  <div class="card">
+    <div class="cal-header">
+      <button class="cal-nav-btn" onclick="changeMonth(-1)">◀ เดือนก่อน</button>
+      <div id="calMonthTitle" style="font-weight:700;font-size:1.05rem;">-</div>
+      <button class="cal-nav-btn" onclick="changeMonth(1)">เดือนหน้า ▶</button>
+    </div>
+
+    <div class="cal-grid" id="calGrid"></div>
+
+    <!-- Monthly Summary -->
+    <div class="summary-stat">
+      <div style="font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between;">
+        <span>📊 สรุปสถิติประจำเดือน</span>
+        <span id="statTotalRounds" style="color:var(--pri);">0 รอบ</span>
+      </div>
+      <div class="form-group" style="margin-top:8px;">
+        <label>ยอดเงินรวมรายเดือน (บาท)</label>
+        <input type="number" id="inpMonthlyIncome" placeholder="กรอกยอดเงินรวม เช่น 30000" oninput="renderMonthlyStats()">
+      </div>
+      <div id="peopleSummaryTableWrap"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL DAY DETAIL ==================== -->
+<div class="modal-overlay" id="dayModal">
+  <div class="modal-card">
+    <div class="modal-title">
+      <span id="modalDateTitle">วันที่ -</span>
+      <button style="background:none;border:none;font-size:1.2rem;color:var(--mut);cursor:pointer;" onclick="closeModal()">✕</button>
+    </div>
+
+    <!-- ตู้ V8 -->
+    <div class="machine-block">
+      <h4>🏪 ตู้ V8 (3 รอบ)</h4>
+      <div class="round-row">
+        <span>รอบ 1:</span>
+        <input type="text" id="inp_v8_1" placeholder="ชื่อคนเติม">
+      </div>
+      <div class="round-row">
+        <span>รอบ 2:</span>
+        <input type="text" id="inp_v8_2" placeholder="ชื่อคนเติม">
+      </div>
+      <div class="round-row">
+        <span>รอบ 3:</span>
+        <input type="text" id="inp_v8_3" placeholder="ชื่อคนเติม">
+      </div>
+    </div>
+
+    <!-- ตู้ V9 -->
+    <div class="machine-block">
+      <h4>🏪 ตู้ V9 (3 รอบ)</h4>
+      <div class="round-row">
+        <span>รอบ 1:</span>
+        <input type="text" id="inp_v9_1" placeholder="ชื่อคนเติม">
+      </div>
+      <div class="round-row">
+        <span>รอบ 2:</span>
+        <input type="text" id="inp_v9_2" placeholder="ชื่อคนเติม">
+      </div>
+      <div class="round-row">
+        <span>รอบ 3:</span>
+        <input type="text" id="inp_v9_3" placeholder="ชื่อคนเติม">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn btn-success" style="flex:1;" onclick="saveDayDetails()">💾 บันทึก</button>
+      <button class="btn" style="flex:1;background:var(--sub);color:var(--text);border:1px solid var(--bdr);" onclick="closeModal()">ปิด</button>
+    </div>
+  </div>
 </div>
 
 <script>
+// ----- Secret Calendar & Data Store -----
+const SECRET_KEY = 'pong14272';
+let currentCalYear = new Date().getFullYear();
+let currentCalMonth = new Date().getMonth();
+let activeModalKey = null;
+
+function openPasscodePrompt(){
+  const pass = prompt('กรุณากรอกรหัสผ่านเพื่อเข้าใช้งานปฏิทิน:');
+  if(pass === SECRET_KEY){
+    document.getElementById('mainToolView').style.display = 'none';
+    document.getElementById('calView').style.display = 'block';
+    renderCalendar();
+  } else if(pass !== null){
+    alert('รหัสผ่านไม่ถูกต้อง');
+  }
+}
+
+function exitCalendar(){
+  document.getElementById('calView').style.display = 'none';
+  document.getElementById('mainToolView').style.display = 'block';
+}
+
+function getStoredSchedule(){
+  try {
+    return JSON.parse(localStorage.getItem('vending_schedule_data') || '{}');
+  } catch(e){ return {}; }
+}
+function setStoredSchedule(data){
+  try {
+    localStorage.setItem('vending_schedule_data', JSON.stringify(data));
+  } catch(e){}
+}
+
+const thaiMonths = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const thaiDays = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+
+function changeMonth(delta){
+  currentCalMonth += delta;
+  if(currentCalMonth < 0){ currentCalMonth = 11; currentCalYear--; }
+  else if(currentCalMonth > 11){ currentCalMonth = 0; currentCalYear++; }
+  renderCalendar();
+}
+
+function renderCalendar(){
+  document.getElementById('calMonthTitle').innerText = `${thaiMonths[currentCalMonth]} ${currentCalYear + 543}`;
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  thaiDays.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'cal-day-head';
+    el.innerText = d;
+    grid.appendChild(el);
+  });
+
+  const firstDay = new Date(currentCalYear, currentCalMonth, 1).getDay();
+  const totalDays = new Date(currentCalYear, currentCalMonth + 1, 0).getDate();
+  const today = new Date();
+  const scheduleData = getStoredSchedule();
+
+  for(let i=0; i<firstDay; i++){
+    const el = document.createElement('div');
+    el.className = 'cal-cell empty';
+    grid.appendChild(el);
+  }
+
+  for(let day=1; day<=totalDays; day++){
+    const key = `${currentCalYear}-${String(currentCalMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const dayData = scheduleData[key] || { v8:['','',''], v9:['','',''] };
+    const filledCount = [...(dayData.v8||[]), ...(dayData.v9||[])].filter(Boolean).length;
+
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell';
+    if(today.getFullYear()===currentCalYear && today.getMonth()===currentCalMonth && today.getDate()===day){
+      cell.classList.add('today');
+    }
+
+    const numSpan = document.createElement('div');
+    numSpan.className = 'cal-cell-num';
+    numSpan.innerText = day;
+    cell.appendChild(numSpan);
+
+    if(filledCount > 0){
+      const dotsWrap = document.createElement('div');
+      dotsWrap.className = 'dots-row';
+      for(let k=0; k<6; k++){
+        const dot = document.createElement('span');
+        dot.className = 'dot ' + (k < filledCount ? (filledCount === 6 ? 'dot-green' : 'dot-orange') : 'dot-gray');
+        dotsWrap.appendChild(dot);
+      }
+      cell.appendChild(dotsWrap);
+    }
+
+    cell.onclick = () => openDayModal(key, day);
+    grid.appendChild(cell);
+  }
+
+  renderMonthlyStats();
+}
+
+function openDayModal(key, day){
+  activeModalKey = key;
+  document.getElementById('modalDateTitle').innerText = `📅 วันที่ ${day} ${thaiMonths[currentCalMonth]} ${currentCalYear + 543}`;
+  const data = getStoredSchedule()[key] || { v8:['','',''], v9:['','',''] };
+
+  document.getElementById('inp_v8_1').value = data.v8?.[0] || '';
+  document.getElementById('inp_v8_2').value = data.v8?.[1] || '';
+  document.getElementById('inp_v8_3').value = data.v8?.[2] || '';
+
+  document.getElementById('inp_v9_1').value = data.v9?.[0] || '';
+  document.getElementById('inp_v9_2').value = data.v9?.[1] || '';
+  document.getElementById('inp_v9_3').value = data.v9?.[2] || '';
+
+  document.getElementById('dayModal').style.display = 'flex';
+}
+
+function closeModal(){
+  document.getElementById('dayModal').style.display = 'none';
+}
+
+function saveDayDetails(){
+  if(!activeModalKey) return;
+  const scheduleData = getStoredSchedule();
+
+  const v8 = [
+    document.getElementById('inp_v8_1').value.trim(),
+    document.getElementById('inp_v8_2').value.trim(),
+    document.getElementById('inp_v8_3').value.trim()
+  ];
+  const v9 = [
+    document.getElementById('inp_v9_1').value.trim(),
+    document.getElementById('inp_v9_2').value.trim(),
+    document.getElementById('inp_v9_3').value.trim()
+  ];
+
+  if(v8.some(Boolean) || v9.some(Boolean)){
+    scheduleData[activeModalKey] = { v8, v9 };
+  } else {
+    delete scheduleData[activeModalKey];
+  }
+
+  setStoredSchedule(scheduleData);
+  closeModal();
+  renderCalendar();
+}
+
+function renderMonthlyStats(){
+  const scheduleData = getStoredSchedule();
+  const prefix = `${currentCalYear}-${String(currentCalMonth+1).padStart(2,'0')}`;
+  let totalRounds = 0;
+  const personCount = {};
+
+  Object.keys(scheduleData).forEach(k => {
+    if(k.startsWith(prefix)){
+      const item = scheduleData[k];
+      const allRounds = [...(item.v8||[]), ...(item.v9||[])].filter(Boolean);
+      totalRounds += allRounds.length;
+      allRounds.forEach(name => {
+        personCount[name] = (personCount[name] || 0) + 1;
+      });
+    }
+  });
+
+  document.getElementById('statTotalRounds').innerText = `${totalRounds} รอบ`;
+  const inc = parseFloat(document.getElementById('inpMonthlyIncome').value) || 0;
+  const wrap = document.getElementById('peopleSummaryTableWrap');
+
+  const names = Object.keys(personCount);
+  if(names.length === 0){
+    wrap.innerHTML = '<p style="font-size:0.8rem;color:var(--mut);text-align:center;margin-top:6px;">ยังไม่มีข้อมูลการเติมในเดือนนี้</p>';
+    return;
+  }
+
+  let html = '<table><thead><tr><th>ผู้เติม</th><th>จำนวนรอบ</th><th>สัดส่วน</th><th>ยอดเงินเฉลี่ย</th></tr></thead><tbody>';
+  names.sort((a,b) => personCount[b] - personCount[a]).forEach(name => {
+    const cnt = personCount[name];
+    const pct = totalRounds > 0 ? ((cnt / totalRounds) * 100).toFixed(1) : 0;
+    const share = totalRounds > 0 ? ((cnt / totalRounds) * inc).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2}) : '0';
+    html += `<tr><td><strong>${name}</strong></td><td>${cnt} รอบ</td><td>${pct}%</td><td style="color:var(--pri);font-weight:700;">${share} บ.</td></tr>`;
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
 // ----- YouTube API Controls -----
 let ytSupportPlayer = null, isPlaying = false;
 function onYouTubeIframeAPIReady(){
@@ -365,7 +667,7 @@ function generateMerged4Image(){
   document.getElementById('resultCard4').scrollIntoView({behavior:'smooth'});
 }
 
-// รวมหลายรูป Auto Grid (คำนวณเลย์เอาต์อัตโนมัติ)
+// รวมหลายรูป Auto Grid
 let multiImages = [];
 let currentMultiBg = '#ffffff';
 
@@ -405,7 +707,6 @@ function generateMultiGridImage(){
   ctx.fillStyle = currentMultiBg;
   ctx.fillRect(0,0,sz,sz);
 
-  // คำนวณตารางตามเงื่อนไข
   let cols = 1, rows = 1;
   if (N === 1) { cols = 1; rows = 1; }
   else if (N === 2) { cols = 2; rows = 1; }
