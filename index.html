@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>ระบบจัดการรูปภาพ & รายงานตู้สินค้า</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
@@ -55,6 +55,15 @@ canvas{display:block;width:100%;height:auto}
 .filter-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
 .filter-btn{flex:1;padding:8px 8px;background:var(--sub);border:1px solid var(--bdr);border-radius:10px;color:var(--text);font-size:0.8rem;font-weight:700;cursor:pointer;transition:all .15s;text-align:center}
 .filter-btn.active{background:var(--pri);color:#fff;border-color:var(--pri)}
+
+/* Backup notice (ช่องติ๊กสำรองรูปลง Drive) */
+.backup-box{display:flex;align-items:flex-start;gap:8px;width:100%;max-width:420px;background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:8px 12px;font-size:.78rem;font-weight:400;color:var(--mut);text-align:left;cursor:pointer;margin:0}
+.backup-box input{width:auto;margin-top:4px;flex-shrink:0}
+.backup-box small{display:block;font-size:.72rem;opacity:.85}
+
+/* Toast */
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--card);color:var(--text);border:1px solid var(--bdr);padding:10px 16px;border-radius:12px;font-size:.85rem;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.3);z-index:10000;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;text-align:center}
+.toast.show{opacity:1}
 
 /* Secret Calendar Button */
 .secret-btn-wrap{display:flex;justify-content:center;margin-top:24px;padding:10px;}
@@ -111,6 +120,15 @@ canvas{display:block;width:100%;height:auto}
         <div class="counter-badge">💾 ดาวน์โหลดสะสม: <span id="dlCount" class="counter-num">...</span> ครั้ง</div>
       </div>
     </div>
+
+    <!-- แจ้งผู้ใช้ว่ารูปที่กดบันทึกจะถูกสำรองลง Drive (ติ๊กออกได้) -->
+    <label class="backup-box" for="chkBackup">
+      <input type="checkbox" id="chkBackup" checked onchange="saveBackupPref()">
+      <span>☁️ สำรองรูปที่กดบันทึกไว้ใน Google Drive ของผู้พัฒนา
+        <small>รูปที่คุณกดบันทึกจะถูกส่งไปเก็บสำเนาไว้ด้วย ถ้าไม่ต้องการให้เก็บ ให้ติ๊กช่องนี้ออก</small>
+      </span>
+    </label>
+
     <h1 style="font-size:1.2rem">จัดการรูปภาพ & รายงานตู้</h1>
     <div class="theme-selector">
       <span style="font-size:0.8rem;font-weight:600;color:var(--mut)">สีเว็บ:</span>
@@ -167,7 +185,7 @@ canvas{display:block;width:100%;height:auto}
       <p style="font-size:0.82rem;color:var(--mut);margin-bottom:10px;">
         1 รูป = เต็มกรอบ | 2 รูป = คู่ซ้ายขวา | 3-4 รูป = 2x2 | 5-6 รูป = 3x2 | 7-9 รูป = 3x3 | 10+ รูป = จัดตารางอัตโนมัติ
       </p>
-      
+
       <div class="upload-box" style="margin-bottom:12px;min-height:100px;">
         <input type="file" accept="image/*" multiple onchange="handleMultiGridUpload(event)">
         <div style="font-size:26px">🖼️</div>
@@ -282,9 +300,9 @@ canvas{display:block;width:100%;height:auto}
       </div>
 
       <div class="video-wrap">
-        <iframe id="ytPlayerBox" 
-          src="https://www.youtube-nocookie.com/embed/videoseries?list=PLeOakVutFxsWcy-646Osotixb5Gi6y9jD&enablejsapi=1" 
-          allow="autoplay; encrypted-media" 
+        <iframe id="ytPlayerBox"
+          src="https://www.youtube-nocookie.com/embed/videoseries?list=PLeOakVutFxsWcy-646Osotixb5Gi6y9jD&enablejsapi=1"
+          allow="autoplay; encrypted-media"
           allowfullscreen>
         </iframe>
       </div>
@@ -449,11 +467,20 @@ canvas{display:block;width:100%;height:auto}
   </div>
 </div>
 
+<div id="toast" class="toast"></div>
+
 <script>
 // ----- Google Apps Script & Security Config -----
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbxGvvlXjLJCTzkshmIoCa-a7T6sZcBynuykVcsiEb0LuiWpmGHFfmlFdSA6wjWIWfT12w/exec';
+
+// รหัสดูปฏิทิน (อ่านอย่างเดียว)
 const VIEW_PIN = '14272';
-const EDIT_PIN = '0103254614272';
+
+// ⚠️ รหัสแก้ไข: เปลี่ยน 'CHANGE_ME' เป็นตัวเลข 4-16 หลักของคุณเอง เช่น '582961'
+// ตราบใดที่ยังเป็น 'CHANGE_ME' จะกดรหัสแก้ไขไม่ได้ (ยังปลดล็อกด้วย OTP ทาง Gmail ได้ตามปกติ)
+// หมายเหตุ: รหัสนี้ยังมองเห็นได้จาก View Source ใช้เป็นแค่ตัวกั้นเบา ๆ อย่าใช้เลขเดียวกับที่อื่น
+const EDIT_PIN = 'CHANGE_ME';
+
 let enteredPin = '';
 let isEditMode = false;
 
@@ -461,6 +488,60 @@ let currentCalYear = new Date().getFullYear();
 let currentCalMonth = new Date().getMonth();
 let activeModalKey = null;
 let lastFocusedInput = null;
+
+// ----- Toast (ข้อความแจ้งสถานะเล็ก ๆ ด้านล่างจอ) -----
+let toastTimer = null;
+function showToast(msg, ms = 4000){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), ms);
+}
+
+// ----- ตัวเลือกสำรองรูปลง Drive -----
+const BACKUP_KEY = 'backup_to_drive';
+function isBackupOn(){
+  try { return localStorage.getItem(BACKUP_KEY) !== 'off'; } catch(e){ return true; }
+}
+function saveBackupPref(){
+  const on = document.getElementById('chkBackup').checked;
+  try { localStorage.setItem(BACKUP_KEY, on ? 'on' : 'off'); } catch(e){}
+}
+document.getElementById('chkBackup').checked = isBackupOn();
+
+// ----- Helper -----
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// โหลดรูปจากไฟล์ (คืน Promise) ใช้ร่วมกันทุกแท็บ เพื่อให้ลำดับรูปตรงกับที่เลือก
+function loadImageFile(file){
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('โหลดรูปไม่ได้: ' + file.name)); };
+    img.src = url;
+  });
+}
+function releaseImage(img){
+  try { if(img && img.src && img.src.startsWith('blob:')) URL.revokeObjectURL(img.src); } catch(e){}
+}
+
+// รอให้ฟอนต์โหลดเสร็จก่อนวาดตัวอักษรลงรูป (กันตัวหนังสือเป็นฟอนต์สำรองในการกดครั้งแรก)
+async function ensureFonts(){
+  try {
+    if(!document.fonts || !document.fonts.load) return;
+    await Promise.race([
+      Promise.all([
+        document.fonts.load('700 50px "Prompt"', 'ก1Aa'),
+        document.fonts.load('700 50px "Sarabun"', 'ก1Aa')
+      ]),
+      new Promise(r => setTimeout(r, 2500))
+    ]);
+  } catch(e){}
+}
 
 // ----- Filter State -----
 let currentFilter4 = 'none';
@@ -582,7 +663,9 @@ function updatePinDisplay(){
   disp.innerText = enteredPin ? '•'.repeat(enteredPin.length) : '------';
 }
 function submitPin(){
-  if(enteredPin === EDIT_PIN){
+  // รหัสแก้ไขใช้ได้ก็ต่อเมื่อเปลี่ยนเป็นตัวเลข 4-16 หลักแล้วเท่านั้น
+  const editPinReady = /^\d{4,16}$/.test(EDIT_PIN);
+  if(editPinReady && enteredPin === EDIT_PIN){
     isEditMode = true;
     closePinModal();
     enterCalendarView();
@@ -853,7 +936,7 @@ function renderMonthlyStats(){
   const scheduleData = getStoredSchedule();
   const prefix = `${currentCalYear}-${String(currentCalMonth+1).padStart(2,'0')}`;
   let totalRounds = 0;
-  const personCount = {};
+  const personCount = Object.create(null);
 
   Object.keys(scheduleData).forEach(k => {
     if(k.startsWith(prefix)){
@@ -881,7 +964,7 @@ function renderMonthlyStats(){
     const cnt = personCount[name];
     const pct = totalRounds > 0 ? ((cnt / totalRounds) * 100).toFixed(1) : 0;
     const share = totalRounds > 0 ? ((cnt / totalRounds) * inc).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2}) : '0';
-    html += `<tr><td><strong>${name}</strong></td><td>${cnt} รอบ</td><td>${pct}%</td><td style="color:var(--pri);font-weight:700;">${share} บ.</td></tr>`;
+    html += `<tr><td><strong>${escapeHtml(name)}</strong></td><td>${cnt} รอบ</td><td>${pct}%</td><td style="color:var(--pri);font-weight:700;">${share} บ.</td></tr>`;
   });
   html += '</tbody></table>';
   wrap.innerHTML = html;
@@ -949,59 +1032,29 @@ updateClock();
 // ----- Global Counters (Real-time Cloud Sync) -----
 const COUNT_NAMESPACE = 'vending_wachira_2026';
 
-async function countVisit(){
-  try{
-    const res = await fetch(`https://abacus.jasoncameron.dev/hit/${COUNT_NAMESPACE}/visits`);
-    const data = await res.json();
-    if(data && typeof data.value !== 'undefined'){
-      document.getElementById('visitCount').innerText = Number(data.value).toLocaleString();
-      return;
-    }
-  }catch(e){}
-  try{
-    const res = await fetch(`https://countapi.mileshilliard.com/api/v1/hit/${COUNT_NAMESPACE}_visits`);
-    const data = await res.json();
-    if(data && data.value){
-      document.getElementById('visitCount').innerText = Number(data.value).toLocaleString();
-    }
-  }catch(e){}
+// kind: 'hit' (นับเพิ่ม) หรือ 'get' (อ่านค่าอย่างเดียว)
+async function callCounter(kind, key, elId){
+  const urls = [
+    `https://abacus.jasoncameron.dev/${kind}/${COUNT_NAMESPACE}/${key}`,
+    `https://countapi.mileshilliard.com/api/v1/${kind}/${COUNT_NAMESPACE}_${key}`
+  ];
+  for(const u of urls){
+    try{
+      const res = await fetch(u);
+      const data = await res.json();
+      if(data && typeof data.value !== 'undefined'){
+        document.getElementById(elId).innerText = Number(data.value).toLocaleString();
+        return true;
+      }
+    }catch(e){}
+  }
+  const el = document.getElementById(elId);
+  if(el.innerText === '...') el.innerText = '-';
+  return false;
 }
-
-async function loadDownloadCount(){
-  try{
-    const res = await fetch(`https://abacus.jasoncameron.dev/get/${COUNT_NAMESPACE}/downloads`);
-    const data = await res.json();
-    if(data && typeof data.value !== 'undefined'){
-      document.getElementById('dlCount').innerText = Number(data.value).toLocaleString();
-      return;
-    }
-  }catch(e){}
-  try{
-    const res = await fetch(`https://countapi.mileshilliard.com/api/v1/get/${COUNT_NAMESPACE}_downloads`);
-    const data = await res.json();
-    if(data && data.value){
-      document.getElementById('dlCount').innerText = Number(data.value).toLocaleString();
-    }
-  }catch(e){}
-}
-
-async function recordDownload(){
-  try{
-    const res = await fetch(`https://abacus.jasoncameron.dev/hit/${COUNT_NAMESPACE}/downloads`);
-    const data = await res.json();
-    if(data && typeof data.value !== 'undefined'){
-      document.getElementById('dlCount').innerText = Number(data.value).toLocaleString();
-      return;
-    }
-  }catch(e){}
-  try{
-    const res = await fetch(`https://countapi.mileshilliard.com/api/v1/hit/${COUNT_NAMESPACE}_downloads`);
-    const data = await res.json();
-    if(data && data.value){
-      document.getElementById('dlCount').innerText = Number(data.value).toLocaleString();
-    }
-  }catch(e){}
-}
+function countVisit(){ return callCounter('hit', 'visits', 'visitCount'); }
+function loadDownloadCount(){ return callCounter('get', 'downloads', 'dlCount'); }
+function recordDownload(){ return callCounter('hit', 'downloads', 'dlCount'); }
 
 countVisit();
 loadDownloadCount();
@@ -1025,14 +1078,31 @@ function switchTab(id){
 
 function drawCover(ctx,img,x,y,w,h){const a=img.width/img.height,ta=w/h;let sx=0,sy=0,sw=img.width,sh=img.height;if(a>ta){sw=img.height*ta;sx=(img.width-sw)/2}else{sh=img.width/ta;sy=(img.height-sh)/2}ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h)}
 
-// 4 รูป มาตรฐาน
-const images4=[null,null,null,null];
-function handleBatch4Upload(e){Array.from(e.target.files).slice(0,4).forEach((f,i)=>loadSingle4(f,i))}
-function handleSingle4Upload(e,i){if(e.target.files[0])loadSingle4(e.target.files[0],i)}
-function loadSingle4(f,i){const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=()=>{images4[i]=img;const t=document.getElementById(`thumb4_${i}`);t.src=e.target.result;t.style.display='block';document.getElementById(`box4_${i+1}`).querySelector('.icon').style.display='none'};img.src=e.target.result};r.readAsDataURL(f)}
+// ================== 4 รูป มาตรฐาน ==================
+const images4 = [null,null,null,null];
 
-function generateMerged4Image(){
-  if(images4.filter(Boolean).length<4)return alert('กรุณาเลือกรูปภาพให้ครบ 4 รูปครับ');
+function handleBatch4Upload(e){
+  // เก็บตามลำดับไฟล์ที่เลือก (index เดิม) ไม่สลับกัน
+  Array.from(e.target.files).slice(0,4).forEach((f,i) => loadSlot4(f,i));
+}
+function handleSingle4Upload(e,i){
+  if(e.target.files[0]) loadSlot4(e.target.files[0],i);
+}
+async function loadSlot4(file,i){
+  try{
+    const img = await loadImageFile(file);
+    releaseImage(images4[i]);
+    images4[i] = img;
+    const t = document.getElementById(`thumb4_${i}`);
+    t.src = img.src;
+    t.style.display = 'block';
+    document.getElementById(`box4_${i+1}`).querySelector('.icon').style.display = 'none';
+  }catch(err){ alert(err.message); }
+}
+
+async function generateMerged4Image(){
+  if(images4.filter(Boolean).length<4) return alert('กรุณาเลือกรูปภาพให้ครบ 4 รูปครับ');
+  await ensureFonts();
   const c=document.getElementById('canvas4'),ctx=c.getContext('2d'),sz=1200,m=14,g=14,w=(sz-m*2-g)/2;
   c.width=sz;c.height=sz;ctx.fillStyle='#fff';ctx.fillRect(0,0,sz,sz);
   const pos=[{x:m,y:m},{x:m+w+g,y:m},{x:m,y:m+w+g},{x:m+w+g,y:m+w+g}];
@@ -1048,8 +1118,9 @@ function generateMerged4Image(){
   document.getElementById('resultCard4').scrollIntoView({behavior:'smooth'});
 }
 
-// รวมหลายรูป Auto Grid
+// ================== รวมหลายรูป Auto Grid ==================
 let multiImages = [];
+let multiLoading = false;
 let currentMultiBg = '#ffffff';
 
 function setMultiBg(color, el){
@@ -1064,25 +1135,31 @@ function randomMultiBg(){
   setMultiBg(hex);
 }
 
-function handleMultiGridUpload(e){
+async function handleMultiGridUpload(e){
   const files = Array.from(e.target.files);
   if(!files.length) return;
-  multiImages = [];
-  document.getElementById('multiCountText').innerText = `เลือกแล้ว ${files.length} รูป (ระบบจะจัดแถวอัตโนมัติ)`;
-  files.forEach(f => {
-    const r = new FileReader();
-    r.onload = ev => {
-      const img = new Image();
-      img.onload = () => multiImages.push(img);
-      img.src = ev.target.result;
-    };
-    r.readAsDataURL(f);
-  });
+  const countEl = document.getElementById('multiCountText');
+  multiLoading = true;
+  countEl.innerText = `กำลังโหลด ${files.length} รูป...`;
+  try{
+    // Promise.all คืนผลตามลำดับไฟล์ที่เลือก แม้รูปโหลดเสร็จไม่พร้อมกัน
+    const loaded = await Promise.all(files.map(loadImageFile));
+    multiImages.forEach(releaseImage);
+    multiImages = loaded;
+    countEl.innerText = `เลือกแล้ว ${loaded.length} รูป (เรียงตามลำดับที่เลือก)`;
+  }catch(err){
+    countEl.innerText = '';
+    alert(err.message);
+  }finally{
+    multiLoading = false;
+  }
 }
 
-function generateMultiGridImage(){
+async function generateMultiGridImage(){
+  if(multiLoading) return alert('กำลังโหลดรูปอยู่ รอสักครู่แล้วกดอีกครั้งครับ');
   const N = multiImages.length;
   if(N === 0) return alert('กรุณาเลือกรูปภาพอย่างน้อย 1 รูปครับ');
+  await ensureFonts();
   const c = document.getElementById('canvasMulti'), ctx = c.getContext('2d'), sz = 1200;
   c.width = sz; c.height = sz;
   ctx.fillStyle = currentMultiBg;
@@ -1155,11 +1232,26 @@ function drawTextOverlay(ctx, sz, t1, t2, pos){
   ctx.restore();
 }
 
-// 2 รูป
-let img2_b=null,img2_a=null;
-function handleSingle2Upload(e,t){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{const img=new Image();img.onload=()=>{if(t==='before'){img2_b=img;thumb2_before.src=ev.target.result;thumb2_before.style.display='block';box2_before.querySelector('.icon').style.display='none'}else{img2_a=img;thumb2_after.src=ev.target.result;thumb2_after.style.display='block';box2_after.querySelector('.icon').style.display='none'}};img.src=ev.target.result};r.readAsDataURL(f)}
-function generateMerged2Image(){
-  if(!img2_b||!img2_a)return alert('กรุณาเลือกรูปภาพให้ครบทั้งก่อนและหลังเติมครับ');
+// ================== 2 รูป ==================
+let img2_b = null, img2_a = null;
+
+async function handleSingle2Upload(e,t){
+  const f = e.target.files[0];
+  if(!f) return;
+  try{
+    const img = await loadImageFile(f);
+    if(t === 'before'){ releaseImage(img2_b); img2_b = img; }
+    else { releaseImage(img2_a); img2_a = img; }
+    const th = document.getElementById('thumb2_' + t);
+    th.src = img.src;
+    th.style.display = 'block';
+    document.getElementById('box2_' + t).querySelector('.icon').style.display = 'none';
+  }catch(err){ alert(err.message); }
+}
+
+async function generateMerged2Image(){
+  if(!img2_b||!img2_a) return alert('กรุณาเลือกรูปภาพให้ครบทั้งก่อนและหลังเติมครับ');
+  await ensureFonts();
   const c=document.getElementById('canvas2'),ctx=c.getContext('2d'),sz=1200;
   c.width=sz;c.height=sz;ctx.fillStyle='#fff';ctx.fillRect(0,0,sz,sz);
   ctx.textAlign='center';ctx.fillStyle='#000';
@@ -1178,52 +1270,93 @@ function generateMerged2Image(){
   document.getElementById('resultCard2').scrollIntoView({behavior:'smooth'});
 }
 
+// ================== บันทึกรูป + สำรองลง Google Drive ==================
+async function backupToDrive(canvas, folderName, fileName){
+  try{
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // text/plain ป้องกันติด CORS preflight
+      body: JSON.stringify({
+        folderName: folderName,
+        fileName: fileName,
+        image: canvas.toDataURL('image/jpeg', 0.85)
+      })
+    });
+    const data = await res.json();
+    if(data && data.status === 'success'){
+      showToast('☁️ สำรองรูปลง Google Drive แล้ว');
+    } else {
+      console.error('อัปโหลด Drive ไม่สำเร็จ:', data);
+      showToast('⚠️ สำรองรูปลง Drive ไม่สำเร็จ (ดูรายละเอียดใน Console)');
+    }
+  }catch(err){
+    console.error('อัปโหลด Drive error:', err);
+    showToast('⚠️ ส่งรูปไปแล้วแต่ยืนยันผลไม่ได้ ลองเช็กใน Drive หรือดู Console');
+  }
+}
+
 function downloadImage(cid, iid, def){
   recordDownload();
   const c = document.getElementById(cid);
   const v = (document.getElementById(iid)?.value || def).replace(/[^a-zA-Z0-9ก-๙]/g, '_');
-  
+
   // 1. ดาวน์โหลดลงเครื่องผู้ใช้ทันที (ไฟล์ PNG ความคมชัดสูงสุด)
   const a = document.createElement('a');
   a.download = `${def}_${v}.png`;
   a.href = c.toDataURL('image/png', 1.0);
   a.click();
 
-  // 2. ตรวจสอบแยกโฟลเดอร์ปลายทาง
+  // 2. สำรองลง Google Drive เฉพาะเมื่อผู้ใช้ไม่ได้ติ๊กช่องสำรองออก
+  if(!isBackupOn()) return;
+
   const targetFolder = (def === 'รายงาน_ตู้') ? 'Vending_เติมตู้' : 'Vending_รูปทั่วไป';
 
-  // 3. ตั้งชื่อไฟล์ วันที่_เวลา_ชื่อสาขา_สุ่มรหัส
+  // ตั้งชื่อไฟล์ วันที่_เวลา_ชื่อสาขา_สุ่มรหัส (ใช้เวลาท้องถิ่น ไม่ใช่ UTC)
   const now = new Date();
-  const dateStr = now.toISOString().slice(0, 10);
+  const dateStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
   const timeStr = String(now.getHours()).padStart(2, '0') + '-' + String(now.getMinutes()).padStart(2, '0');
   const randCode = Math.random().toString(36).substring(2, 6);
   const driveFileName = `${dateStr}_${timeStr}_${v}_${randCode}.jpg`;
 
-  // 4. ส่งรูปเข้า Google Drive เบื้องหลัง (ใช้ text/plain ป้องกันติด CORS)
-  try {
-    fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({
-        folderName: targetFolder,
-        fileName: driveFileName,
-        image: c.toDataURL('image/jpeg', 0.85)
-      })
-    });
-  } catch(e) {}
+  backupToDrive(c, targetFolder, driveFileName);
 }
 
-let pdfImgs=[];
-function handlePdfFiles(e){pdfImgs=[];const fs=Array.from(e.target.files);document.getElementById('pdfCountText').innerText=`เลือกแล้ว ${fs.length} รูป`;fs.forEach(f=>{const r=new FileReader();r.onload=ev=>{const img=new Image();img.onload=()=>pdfImgs.push(img);img.src=ev.target.result};r.readAsDataURL(f)})}
+// ================== PDF ==================
+let pdfImgs = [];
+let pdfLoading = false;
+
+async function handlePdfFiles(e){
+  const files = Array.from(e.target.files);
+  if(!files.length) return;
+  const countEl = document.getElementById('pdfCountText');
+  pdfLoading = true;
+  countEl.innerText = `กำลังโหลด ${files.length} รูป...`;
+  try{
+    const loaded = await Promise.all(files.map(loadImageFile));
+    pdfImgs.forEach(releaseImage);
+    pdfImgs = loaded;
+    countEl.innerText = `เลือกแล้ว ${loaded.length} รูป (เรียงตามลำดับที่เลือก)`;
+  }catch(err){
+    countEl.innerText = '';
+    alert(err.message);
+  }finally{
+    pdfLoading = false;
+  }
+}
+
 function generatePdf(){
-  if(!pdfImgs.length)return alert('กรุณาเลือกรูปภาพก่อนครับ');
+  if(pdfLoading) return alert('กำลังโหลดรูปอยู่ รอสักครู่แล้วกดอีกครั้งครับ');
+  if(!pdfImgs.length) return alert('กรุณาเลือกรูปภาพก่อนครับ');
   recordDownload();
-  const doc=new jspdf.jsPDF({orientation:pdfOrientation.value,unit:'mm',format:'a4'});
-  const pw=doc.internal.pageSize.getWidth(),ph=doc.internal.pageSize.getHeight(),mw=pw-20,mh=ph-20;
+  const doc = new jspdf.jsPDF({orientation:document.getElementById('pdfOrientation').value,unit:'mm',format:'a4'});
+  const pw = doc.internal.pageSize.getWidth(), ph = doc.internal.pageSize.getHeight(), mw = pw-20, mh = ph-20;
   pdfImgs.forEach((img,idx)=>{
-    if(idx>0)doc.addPage();
-    let w=mw,h=mw/(img.width/img.height);if(h>mh){h=mh;w=mh*(img.width/img.height)}
-    const c=document.createElement('canvas');c.width=img.width;c.height=img.height;c.getContext('2d').drawImage(img,0,0);
+    if(idx>0) doc.addPage();
+    let w = mw, h = mw/(img.width/img.height);
+    if(h>mh){ h = mh; w = mh*(img.width/img.height); }
+    const c = document.createElement('canvas');
+    c.width = img.width; c.height = img.height;
+    c.getContext('2d').drawImage(img,0,0);
     doc.addImage(c.toDataURL('image/jpeg',0.92),'JPEG',(pw-w)/2,(ph-h)/2,w,h);
   });
   doc.save('เอกสาร.pdf');
