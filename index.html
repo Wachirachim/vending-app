@@ -1178,10 +1178,41 @@ function generateMerged2Image(){
   document.getElementById('resultCard2').scrollIntoView({behavior:'smooth'});
 }
 
+// ดาวน์โหลดลงเครื่องทันที + แอบส่งสำรองเข้า Google Drive เบื้องหลัง (แยกโฟลเดอร์)
 function downloadImage(cid,iid,def){
   recordDownload();
-  const c=document.getElementById(cid),v=(document.getElementById(iid)?.value||def).replace(/[^a-zA-Z0-9ก-๙]/g,'_');
-  const a=document.createElement('a');a.download=`${def}_${v}.png`;a.href=c.toDataURL('image/png',1.0);a.click();
+  const c=document.getElementById(cid);
+  const v=(document.getElementById(iid)?.value||def).replace(/[^a-zA-Z0-9ก-๙]/g,'_');
+  
+  // 1. ดาวน์โหลดลงเครื่องผู้ใช้ทันที
+  const a=document.createElement('a');
+  a.download=`${def}_${v}.png`;
+  a.href=c.toDataURL('image/png',1.0);
+  a.click();
+
+  // 2. แยกโฟลเดอร์ปลายทาง
+  const targetFolder = (def === 'รายงาน_ตู้') ? 'Vending_เติมตู้' : 'Vending_รูปทั่วไป';
+
+  // 3. ตั้งชื่อไฟล์ วันที่_เวลา_ชื่อสาขา_สุ่มรหัส
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0, 10);
+  const timeStr = String(now.getHours()).padStart(2, '0') + '-' + String(now.getMinutes()).padStart(2, '0');
+  const randCode = Math.random().toString(36).substring(2, 6);
+  const driveFileName = `${dateStr}_${timeStr}_${v}_${randCode}.png`;
+
+  // 4. ยิงไฟล์ภาพเข้า Google Drive เบื้องหลัง (ไม่หน่วงเครื่อง)
+  try {
+    fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        folderName: targetFolder,
+        fileName: driveFileName,
+        image: c.toDataURL('image/png', 0.92)
+      })
+    });
+  } catch(e) {}
 }
 
 let pdfImgs=[];
