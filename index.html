@@ -400,9 +400,15 @@ canvas{display:block;width:100%;height:auto}
         <span>📊 สรุปสถิติประจำเดือน</span>
         <span id="statTotalRounds" style="color:var(--pri);">0 รอบ</span>
       </div>
-      <div class="form-group" style="margin-top:8px;">
-        <label>ยอดเงินรวมรายเดือน (บาท)</label>
-        <input type="number" id="inpMonthlyIncome" placeholder="กรอกยอดเงินรวม เช่น 30000" oninput="renderMonthlyStats()">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label style="color:#f97316;font-weight:700;">🏪 ยอดเงินตู้ V8 (บาท)</label>
+          <input type="number" id="inpIncomeV8" placeholder="เช่น 15000" oninput="renderMonthlyStats()">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label style="color:#22c55e;font-weight:700;">🏪 ยอดเงินตู้ V9 (บาท)</label>
+          <input type="number" id="inpIncomeV9" placeholder="เช่น 18000" oninput="renderMonthlyStats()">
+        </div>
       </div>
       <div id="peopleSummaryTableWrap"></div>
     </div>
@@ -990,39 +996,103 @@ function saveDayDetails(){
   });
 }
 
+function loadMonthlyIncomeInputs(prefix){
+  try {
+    const v8Val = localStorage.getItem(`vending_inc_v8_${prefix}`) || '';
+    const v9Val = localStorage.getItem(`vending_inc_v9_${prefix}`) || '';
+    const el8 = document.getElementById('inpIncomeV8');
+    const el9 = document.getElementById('inpIncomeV9');
+    if(el8 && document.activeElement !== el8) el8.value = v8Val;
+    if(el9 && document.activeElement !== el9) el9.value = v9Val;
+  } catch(e){}
+}
+
 function renderMonthlyStats(){
   const scheduleData = getStoredSchedule();
   const prefix = `${currentCalYear}-${String(currentCalMonth+1).padStart(2,'0')}`;
-  let totalRounds = 0;
-  const personCount = Object.create(null);
+  
+  loadMonthlyIncomeInputs(prefix);
+
+  let totalV8 = 0;
+  let totalV9 = 0;
+  const personV8 = Object.create(null);
+  const personV9 = Object.create(null);
+  const allPersonSet = new Set();
 
   Object.keys(scheduleData).forEach(k => {
     if(k.startsWith(prefix)){
       const item = scheduleData[k];
-      const allRounds = [...(item.v8||[]), ...(item.v9||[])].filter(Boolean);
-      totalRounds += allRounds.length;
-      allRounds.forEach(name => {
-        personCount[name] = (personCount[name] || 0) + 1;
+      const v8Rounds = (item.v8 || []).filter(Boolean);
+      const v9Rounds = (item.v9 || []).filter(Boolean);
+
+      totalV8 += v8Rounds.length;
+      totalV9 += v9Rounds.length;
+
+      v8Rounds.forEach(name => {
+        const t = name.trim();
+        if(t){
+          personV8[t] = (personV8[t] || 0) + 1;
+          allPersonSet.add(t);
+        }
+      });
+
+      v9Rounds.forEach(name => {
+        const t = name.trim();
+        if(t){
+          personV9[t] = (personV9[t] || 0) + 1;
+          allPersonSet.add(t);
+        }
       });
     }
   });
 
-  document.getElementById('statTotalRounds').innerText = `${totalRounds} รอบ`;
-  const inc = parseFloat(document.getElementById('inpMonthlyIncome').value) || 0;
-  const wrap = document.getElementById('peopleSummaryTableWrap');
+  const totalRounds = totalV8 + totalV9;
+  document.getElementById('statTotalRounds').innerText = `รวม ${totalRounds} รอบ (V8: ${totalV8} | V9: ${totalV9})`;
 
-  const names = Object.keys(personCount);
+  const el8 = document.getElementById('inpIncomeV8');
+  const el9 = document.getElementById('inpIncomeV9');
+  const incV8 = el8 ? (parseFloat(el8.value) || 0) : 0;
+  const incV9 = el9 ? (parseFloat(el9.value) || 0) : 0;
+
+  // บันทึกยอดเงินจำไว้ในแต่ละเดือน
+  try {
+    if(el8) localStorage.setItem(`vending_inc_v8_${prefix}`, el8.value);
+    if(el9) localStorage.setItem(`vending_inc_v9_${prefix}`, el9.value);
+  } catch(e){}
+
+  const wrap = document.getElementById('peopleSummaryTableWrap');
+  const names = Array.from(allPersonSet);
+
   if(names.length === 0){
     wrap.innerHTML = '<p style="font-size:0.8rem;color:var(--mut);text-align:center;margin-top:6px;">ยังไม่มีข้อมูลการเติมในเดือนนี้</p>';
     return;
   }
 
-  let html = '<table><thead><tr><th>ผู้เติม</th><th>จำนวนรอบ</th><th>สัดส่วน</th><th>ยอดเงินเฉลี่ย</th></tr></thead><tbody>';
-  names.sort((a,b) => personCount[b] - personCount[a]).forEach(name => {
-    const cnt = personCount[name];
-    const pct = totalRounds > 0 ? ((cnt / totalRounds) * 100).toFixed(1) : 0;
-    const share = totalRounds > 0 ? ((cnt / totalRounds) * inc).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2}) : '0';
-    html += `<tr><td><strong>${escapeHtml(name)}</strong></td><td>${cnt} รอบ</td><td>${pct}%</td><td style="color:var(--pri);font-weight:700;">${share} บ.</td></tr>`;
+  // คำนวณยอดเงินและเรียงลำดับจากเงินรวมมากสุด
+  const statsList = names.map(name => {
+    const c8 = personV8[name] || 0;
+    const c9 = personV9[name] || 0;
+    const share8 = totalV8 > 0 ? (c8 / totalV8) * incV8 : 0;
+    const share9 = totalV9 > 0 ? (c9 / totalV9) * incV9 : 0;
+    const totalShare = share8 + share9;
+    const totalCount = c8 + c9;
+    return { name, c8, c9, totalCount, totalShare };
+  });
+
+  statsList.sort((a,b) => b.totalShare - a.totalShare || b.totalCount - a.totalCount);
+
+  let html = '<table><thead><tr><th>ผู้เติม</th><th>V8 (ส้ม)</th><th>V9 (เขียว)</th><th>รวมรอบ</th><th>ยอดเงินรวม</th></tr></thead><tbody>';
+  statsList.forEach(st => {
+    const moneyStr = (incV8 > 0 || incV9 > 0)
+      ? `${st.totalShare.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2})} บ.`
+      : '-';
+    html += `<tr>
+      <td><strong>${escapeHtml(st.name)}</strong></td>
+      <td style="color:#f97316;">${st.c8} รอบ</td>
+      <td style="color:#22c55e;">${st.c9} รอบ</td>
+      <td><strong>${st.totalCount}</strong></td>
+      <td style="color:var(--pri);font-weight:700;">${moneyStr}</td>
+    </tr>`;
   });
   html += '</tbody></table>';
   wrap.innerHTML = html;
