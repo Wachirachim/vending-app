@@ -47,6 +47,9 @@ canvas{display:block;width:100%;height:auto}
 .video-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;border:1px solid var(--bdr);margin-bottom:12px;background:#000}
 .video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
 .ctrl-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.palette-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.color-chip{width:32px;height:32px;border-radius:8px;cursor:pointer;border:2px solid var(--bdr)}
+.color-chip.active{border-color:var(--pri);transform:scale(1.1)}
 </style>
 </head>
 <body data-theme="brown">
@@ -81,9 +84,9 @@ canvas{display:block;width:100%;height:auto}
     <button class="tab-btn" onclick="switchTab('tabMusic')">☕ สนับสนุน</button>
   </div>
 
-  <!-- TAB 4 รูป & หลายรูป -->
+  <!-- TAB 4 รูป & หลายรูป Auto Grid -->
   <div id="tab4" class="tab-panel active">
-    <!-- กล่องที่ 1: รวม 4 รูปมาตรฐาน -->
+    <!-- กล่อง 1: รวม 4 รูปมาตรฐาน -->
     <div class="card">
       <div class="card-title">📸 1. รวม 4 รูป (2x2 มาตรฐาน)</div>
       <label class="btn btn-batch" style="cursor:pointer">⚡ กดที่นี่เพื่อเลือก 4 รูปพร้อมกันทีเดียว
@@ -106,23 +109,52 @@ canvas{display:block;width:100%;height:auto}
       <button class="btn btn-success" onclick="downloadImage('canvas4','txt4_name','รายงาน_4รูป')">💾 บันทึกรูป 4 ช่อง (PNG)</button>
     </div>
 
-    <!-- กล่องที่ 2: รวมหลายรูปอิสระ (1, 2, 3... 10+ รูป) จัดรูปเองอัตโนมัติ -->
+    <!-- กล่อง 2: รวมหลายรูป Auto Grid (ใส่กี่รูปก็ได้ 1-10+ รูป จัดตารางอัตโนมัติ) -->
     <div class="card" style="border: 2px dashed var(--pri);">
-      <div class="card-title">🧩 2. รวมหลายรูปอิสระ (ใส่กี่รูปก็ได้ 1-10+ รูป จัดตารางอัตโนมัติ)</div>
+      <div class="card-title">🧩 2. รวมรูป Auto Grid (ใส่กี่รูปก็ได้ 1-10+ รูป)</div>
+      <p style="font-size:0.82rem;color:var(--mut);margin-bottom:10px;">
+        1 รูป = เต็มกรอบ | 2 รูป = คู่ซ้ายขวา | 3-4 รูป = 2x2 | 5-6 รูป = 3x2 | 7-9 รูป = 3x3 | 10+ รูป = จัดตารางอัตโนมัติ
+      </p>
+      
       <div class="upload-box" style="margin-bottom:12px;min-height:100px;">
         <input type="file" accept="image/*" multiple onchange="handleMultiGridUpload(event)">
         <div style="font-size:26px">🖼️</div>
-        <span style="font-weight:700">แตะเพื่อเลือกหลายรูป (1 ถึง 10+ รูป)</span>
+        <span style="font-weight:700">แตะเพื่อเลือกรูปภาพ (เลือกกี่รูปก็ได้)</span>
         <div id="multiCountText" style="color:var(--pri);font-size:.82rem;font-weight:700;margin-top:4px"></div>
       </div>
-      <div class="form-group"><label>ข้อความบรรทัด 1 (ถ้ามี)</label><input type="text" id="txtMulti_1" placeholder="เช่น 14272"></div>
-      <div class="form-group"><label>ข้อความบรรทัด 2 (ถ้ามี)</label><input type="text" id="txtMulti_2" placeholder="เช่น บ้านโป่งไผ่"></div>
-      <button class="btn" onclick="generateMultiGridImage()">✨ รวมรูปหลายรูป (จัดตารางอัตโนมัติ 1:1)</button>
+
+      <!-- ตัวเลือกสีพื้นหลังรูป -->
+      <label>🎨 สีพื้นหลังรูป (ช่องว่างระหว่างรูป)</label>
+      <div class="palette-row">
+        <div class="color-chip active" style="background:#ffffff" onclick="setMultiBg('#ffffff', this)" title="ขาว"></div>
+        <div class="color-chip" style="background:#000000" onclick="setMultiBg('#000000', this)" title="ดำ"></div>
+        <div class="color-chip" style="background:#2b1e16" onclick="setMultiBg('#2b1e16', this)" title="น้ำตาล"></div>
+        <div class="color-chip" style="background:#475569" onclick="setMultiBg('#475569', this)" title="เทา"></div>
+        <input type="color" id="pickerMultiBg" value="#ffffff" onchange="setMultiBg(this.value)" style="width:36px;height:34px;border:none;background:none;cursor:pointer;" title="เลือกสีเอง">
+        <button type="button" class="btn" style="width:auto;padding:6px 12px;font-size:0.8rem;background:var(--sub);color:var(--text);border:1px solid var(--bdr);" onclick="randomMultiBg()">
+          🎲 สุ่มสี
+        </button>
+      </div>
+
+      <!-- ตัวเลือกตำแหน่งข้อความ -->
+      <div class="form-group">
+        <label>📍 ตำแหน่งข้อความ</label>
+        <select id="selTextPos">
+          <option value="center">ทับตรงกลาง (Center)</option>
+          <option value="topbottom">หัว-ท้ายรูป (Header & Footer)</option>
+          <option value="none">ไม่ใส่ข้อความ (Clean รูปเพียวๆ)</option>
+        </select>
+      </div>
+
+      <div class="form-group"><label>ข้อความบรรทัด 1 (รหัส/หัวข้อ)</label><input type="text" id="txtMulti_1" placeholder="เช่น 14272 หรือ เติมสินค้า"></div>
+      <div class="form-group"><label>ข้อความบรรทัด 2 (ชื่อสาขา/รายละเอียด)</label><input type="text" id="txtMulti_2" placeholder="เช่น บ้านโป่งไผ่"></div>
+
+      <button class="btn" onclick="generateMultiGridImage()">✨ รวมรูปภาพ Auto Grid (1:1)</button>
     </div>
     <div class="card result-container" id="resultCardMulti">
-      <div class="card-title">🎉 ผลลัพธ์รูปภาพรวมหลายช่อง</div>
+      <div class="card-title">🎉 ผลลัพธ์รูปภาพ Auto Grid</div>
       <div class="result-canvas-wrap"><canvas id="canvasMulti"></canvas></div>
-      <button class="btn btn-success" onclick="downloadImage('canvasMulti','txtMulti_2','รายงาน_หลายรูป')">💾 บันทึกรูปรวม (PNG)</button>
+      <button class="btn btn-success" onclick="downloadImage('canvasMulti','txtMulti_2','รายงาน_AutoGrid')">💾 บันทึกรูปรวม (PNG)</button>
     </div>
   </div>
 
@@ -198,7 +230,7 @@ canvas{display:block;width:100%;height:auto}
 
 <script>
 // ----- YouTube API Controls -----
-let ytSupportPlayer = null, isPlaying = false, isMuted = false;
+let ytSupportPlayer = null, isPlaying = false;
 function onYouTubeIframeAPIReady(){
   ytSupportPlayer = new YT.Player('ytPlayerBox', {
     playerVars: { listType: 'playlist', list: 'PLeOakVutFxsWcy-646Osotixb5Gi6y9jD', loop: 1 },
@@ -328,13 +360,27 @@ function generateMerged4Image(){
   c.width=sz;c.height=sz;ctx.fillStyle='#fff';ctx.fillRect(0,0,sz,sz);
   const pos=[{x:m,y:m},{x:m+w+g,y:m},{x:m,y:m+w+g},{x:m+w+g,y:m+w+g}];
   for(let i=0;i<4;i++)drawCover(ctx,images4[i],pos[i].x,pos[i].y,w,w);
-  drawCenterText(ctx, sz, document.getElementById('txt4_code').value.trim(), document.getElementById('txt4_name').value.trim());
+  drawTextOverlay(ctx, sz, document.getElementById('txt4_code').value.trim(), document.getElementById('txt4_name').value.trim(), 'center');
   document.getElementById('resultCard4').style.display='block';
   document.getElementById('resultCard4').scrollIntoView({behavior:'smooth'});
 }
 
-// รวมหลายรูปอิสระ (1 - 10+ รูป จัดตารางอัตโนมัติ)
+// รวมหลายรูป Auto Grid (คำนวณเลย์เอาต์อัตโนมัติ)
 let multiImages = [];
+let currentMultiBg = '#ffffff';
+
+function setMultiBg(color, el){
+  currentMultiBg = color;
+  document.getElementById('pickerMultiBg').value = color.length === 7 ? color : '#ffffff';
+  document.querySelectorAll('.color-chip').forEach(c => c.classList.remove('active'));
+  if(el) el.classList.add('active');
+}
+
+function randomMultiBg(){
+  const hex = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+  setMultiBg(hex);
+}
+
 function handleMultiGridUpload(e){
   const files = Array.from(e.target.files);
   if(!files.length) return;
@@ -356,10 +402,21 @@ function generateMultiGridImage(){
   if(N === 0) return alert('กรุณาเลือกรูปภาพอย่างน้อย 1 รูปครับ');
   const c = document.getElementById('canvasMulti'), ctx = c.getContext('2d'), sz = 1200;
   c.width = sz; c.height = sz;
-  ctx.fillStyle = '#fff'; ctx.fillRect(0,0,sz,sz);
+  ctx.fillStyle = currentMultiBg;
+  ctx.fillRect(0,0,sz,sz);
 
-  const cols = Math.ceil(Math.sqrt(N));
-  const rows = Math.ceil(N / cols);
+  // คำนวณตารางตามเงื่อนไข
+  let cols = 1, rows = 1;
+  if (N === 1) { cols = 1; rows = 1; }
+  else if (N === 2) { cols = 2; rows = 1; }
+  else if (N <= 4) { cols = 2; rows = 2; }
+  else if (N <= 6) { cols = 3; rows = 2; }
+  else if (N <= 9) { cols = 3; rows = 3; }
+  else {
+    cols = Math.ceil(Math.sqrt(N));
+    rows = Math.ceil(N / cols);
+  }
+
   const m = 14, g = 10;
   const cellW = (sz - (m * 2) - (g * (cols - 1))) / cols;
   const cellH = (sz - (m * 2) - (g * (rows - 1))) / rows;
@@ -372,16 +429,27 @@ function generateMultiGridImage(){
     drawCover(ctx, multiImages[i], x, y, cellW, cellH);
   }
 
-  drawCenterText(ctx, sz, document.getElementById('txtMulti_1').value.trim(), document.getElementById('txtMulti_2').value.trim());
+  const pos = document.getElementById('selTextPos').value;
+  const t1 = document.getElementById('txtMulti_1').value.trim();
+  const t2 = document.getElementById('txtMulti_2').value.trim();
+  drawTextOverlay(ctx, sz, t1, t2, pos);
+
   document.getElementById('resultCardMulti').style.display = 'block';
   document.getElementById('resultCardMulti').scrollIntoView({behavior:'smooth'});
 }
 
-function drawCenterText(ctx, sz, t1, t2){
-  if(t1 || t2){
-    ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+function drawTextOverlay(ctx, sz, t1, t2, pos){
+  if(pos === 'none' || (!t1 && !t2)) return;
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.lineWidth = 14;
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#000';
+  ctx.fillStyle = '#fff';
+
+  if(pos === 'center'){
+    ctx.textBaseline = 'middle';
     ctx.font = 'bold 74px "Prompt", sans-serif';
-    ctx.lineWidth = 14; ctx.lineJoin = 'round'; ctx.strokeStyle = '#000'; ctx.fillStyle = '#fff';
     if(t1 && t2){
       ctx.strokeText(t1, sz/2, sz/2 - 46); ctx.fillText(t1, sz/2, sz/2 - 46);
       ctx.font = 'bold 70px "Prompt", sans-serif';
@@ -390,8 +458,15 @@ function drawCenterText(ctx, sz, t1, t2){
       const s = t1 || t2;
       ctx.strokeText(s, sz/2, sz/2); ctx.fillText(s, sz/2, sz/2);
     }
-    ctx.restore();
+  } else if(pos === 'topbottom'){
+    ctx.textBaseline = 'top';
+    ctx.font = 'bold 64px "Prompt", sans-serif';
+    if(t1){ ctx.strokeText(t1, sz/2, 35); ctx.fillText(t1, sz/2, 35); }
+    ctx.textBaseline = 'bottom';
+    ctx.font = 'bold 64px "Prompt", sans-serif';
+    if(t2){ ctx.strokeText(t2, sz/2, sz - 35); ctx.fillText(t2, sz/2, sz - 35); }
   }
+  ctx.restore();
 }
 
 // 2 รูป
