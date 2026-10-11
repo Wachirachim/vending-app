@@ -662,8 +662,24 @@ function updatePinDisplay(){
   const disp = document.getElementById('pinDisplay');
   disp.innerText = enteredPin ? '•'.repeat(enteredPin.length) : '------';
 }
-function submitPin(){
-  // รหัสแก้ไขใช้ได้ก็ต่อเมื่อเปลี่ยนเป็นตัวเลข 4-16 หลักแล้วเท่านั้น
+async function submitPin(){
+  if(!enteredPin) return;
+  const disp = document.getElementById('pinDisplay');
+  disp.innerText = '⏳ กำลังตรวจ...';
+
+  // 1. ตรวจสอบผ่านเซิร์ฟเวอร์ก่อน (ความปลอดภัยสูง)
+  try {
+    const res = await fetch(`${GAS_URL}?action=verify_pin&pin=${encodeURIComponent(enteredPin)}`);
+    const data = await res.json();
+    if(data && data.status === 'success'){
+      isEditMode = (data.role === 'edit');
+      closePinModal();
+      enterCalendarView();
+      return;
+    }
+  } catch(e){}
+
+  // 2. ตรวจสอบสำรองกรณีออฟไลน์
   const editPinReady = /^\d{4,16}$/.test(EDIT_PIN);
   if(editPinReady && enteredPin === EDIT_PIN){
     isEditMode = true;
@@ -691,11 +707,30 @@ function updateRoleStatus(){
   }
 }
 
+async function fetchScheduleFromSheet(){
+  try {
+    const res = await fetch(`${GAS_URL}?action=get_schedule`);
+    const data = await res.json();
+    if(data && data.status === 'success'){
+      if(data.data){
+        setStoredSchedule(data.data);
+      }
+      if(data.names && Array.isArray(data.names)){
+        try { localStorage.setItem('vending_recent_names', JSON.stringify(data.names)); } catch(err){}
+      }
+      renderCalendar();
+    }
+  } catch(e){
+    console.error('Failed to sync schedule from Sheet:', e);
+  }
+}
+
 function enterCalendarView(){
   document.getElementById('mainToolView').style.display = 'none';
   document.getElementById('calView').style.display = 'block';
   updateRoleStatus();
   renderCalendar();
+  fetchScheduleFromSheet();
 }
 
 function exitCalendar(){
@@ -927,9 +962,32 @@ function saveDayDetails(){
     delete scheduleData[activeModalKey];
   }
 
+  // 1. บันทึกลงเครื่องทันทีเพื่อให้หน้าจออัปเดตเรียลไทม์
   setStoredSchedule(scheduleData);
   closeModal();
   renderCalendar();
+
+  // 2. ซิงก์ขึ้น Google Sheets กลาง
+  fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({
+      action: 'save_day',
+      date: activeModalKey,
+      v8: v8,
+      v9: v9
+    })
+  })
+  .then(r => r.json())
+  .then(res => {
+    if(res && res.status === 'success'){
+      showToast('☁️ ซิงก์ปฏิทินลง Google Sheets แล้ว');
+    }
+  })
+  .catch(err => {
+    console.error('ซิงก์ Google Sheets ไม่สำเร็จ:', err);
+    showToast('⚠️ บันทึกในเครื่องแล้ว (แต่ซิงก์ขึ้น Sheets ไม่สำเร็จ)');
+  });
 }
 
 function renderMonthlyStats(){
@@ -1058,6 +1116,7 @@ function recordDownload(){ return callCounter('hit', 'downloads', 'dlCount'); }
 
 countVisit();
 loadDownloadCount();
+fetchScheduleFromSheet();
 
 function setTheme(t){
   document.body.setAttribute('data-theme',t);
