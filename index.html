@@ -296,14 +296,37 @@ canvas{display:block;width:100%;height:auto}
   </div>
 </div>
 
+<!-- ==================== OTP MODAL ==================== -->
+<div class="modal-overlay" id="otpModal">
+  <div class="modal-card" style="max-width:340px;text-align:center;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <span style="font-weight:700;font-size:1rem;">✉️ ยืนยันรหัส OTP จาก Gmail</span>
+      <button style="background:none;border:none;font-size:1.2rem;color:var(--mut);cursor:pointer;" onclick="closeOtpModal()">✕</button>
+    </div>
+    <p style="font-size:0.82rem;color:var(--mut);margin-bottom:12px;">
+      ระบบได้ส่งรหัส 6 หลักไปยัง Gmail ของคุณแล้ว กรุณานำมากรอกเพื่อปลดล็อกโหมดแก้ไข
+    </p>
+    <div class="form-group">
+      <input type="text" id="inpOtpCode" maxlength="6" placeholder="รหัส OTP 6 หลัก" style="text-align:center;font-size:1.4rem;letter-spacing:6px;font-weight:800;">
+    </div>
+    <div id="otpStatusMsg" style="font-size:0.8rem;margin-bottom:10px;min-height:18px;"></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-success" id="btnVerifyOtp" style="flex:1;" onclick="submitVerifyOtp()">ยืนยันรหัส</button>
+      <button class="btn" style="flex:1;background:var(--sub);color:var(--text);border:1px solid var(--bdr);" onclick="requestOtpCode()">ส่งรหัสอีกครั้ง</button>
+    </div>
+  </div>
+</div>
+
 <!-- ==================== CALENDAR DASHBOARD VIEW ==================== -->
 <div class="container" id="calView">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
     <button class="btn" style="width:auto;padding:8px 14px;background:var(--sub);color:var(--text);border:1px solid var(--bdr);" onclick="exitCalendar()">
       ↩️ กลับหน้าหลัก
     </button>
-    <div style="text-align:right;">
-      <span style="font-size:0.88rem;font-weight:700;color:var(--pri);display:block;">🔒 ปฏิทินรอบเติมตู้</span>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button id="btnRequestOtpUnlock" class="btn" style="width:auto;padding:7px 12px;font-size:0.8rem;background:var(--sub);color:var(--pri);border:1px solid var(--pri);" onclick="requestOtpCode()">
+        ⚙️ ปลดล็อกแก้ไข (OTP)
+      </button>
       <span id="calRoleBadge" style="font-size:0.75rem;font-weight:600;">-</span>
     </div>
   </div>
@@ -397,7 +420,8 @@ canvas{display:block;width:100%;height:auto}
 </div>
 
 <script>
-// ----- Secret Calendar & Multi-Level PIN Pad -----
+// ----- Google Apps Script & Security Config -----
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxGvvlXjLJCTzkshmIoCa-a7T6sZcBynuykVcsiEb0LuiWpmGHFfmlFdSA6wjWIWfT12w/exec';
 const VIEW_PIN = '14272';
 const EDIT_PIN = '0103254614272';
 let enteredPin = '';
@@ -408,6 +432,66 @@ let currentCalMonth = new Date().getMonth();
 let activeModalKey = null;
 let lastFocusedInput = null;
 
+// ----- OTP Request & Verification -----
+async function requestOtpCode(){
+  const btn = document.getElementById('btnRequestOtpUnlock');
+  const msg = document.getElementById('otpStatusMsg');
+  if(btn) btn.innerText = '⏳ กำลังส่ง OTP...';
+  if(msg) msg.innerHTML = '<span style="color:var(--pri);">กำลังส่งรหัสเข้า Gmail...</span>';
+  document.getElementById('otpModal').style.display = 'flex';
+  document.getElementById('inpOtpCode').value = '';
+
+  try {
+    const res = await fetch(`${GAS_URL}?action=request_otp`);
+    const data = await res.json();
+    if(data && data.status === 'sent'){
+      msg.innerHTML = '<span style="color:#22c55e;">ส่งรหัส 6 หลักเข้า Gmail เรียบร้อยแล้ว! (อายุ 5 นาที)</span>';
+    } else {
+      msg.innerHTML = '<span style="color:#ef4444;">ส่งรหัสไม่สำเร็จ กรุณาลองใหม่อีกครั้ง</span>';
+    }
+  } catch(e) {
+    msg.innerHTML = '<span style="color:#ef4444;">เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่</span>';
+  } finally {
+    if(btn) btn.innerText = '⚙️ ปลดล็อกแก้ไข (OTP)';
+  }
+}
+
+async function submitVerifyOtp(){
+  const otp = document.getElementById('inpOtpCode').value.trim();
+  const msg = document.getElementById('otpStatusMsg');
+  const btn = document.getElementById('btnVerifyOtp');
+  if(!otp || otp.length !== 6){
+    msg.innerHTML = '<span style="color:#ef4444;">กรุณากรอกรหัสให้ครบ 6 หลัก</span>';
+    return;
+  }
+  btn.innerText = '⏳ ตรวจสอบ...';
+  msg.innerHTML = '<span style="color:var(--pri);">กำลังตรวจสอบรหัส...</span>';
+
+  try {
+    const res = await fetch(`${GAS_URL}?action=verify_otp&otp=${encodeURIComponent(otp)}`);
+    const data = await res.json();
+    if(data && data.status === 'success'){
+      isEditMode = true;
+      closeOtpModal();
+      alert('🎉 ยืนยันตัวตนสำเร็จ! ปลดล็อกโหมดแก้ไขเรียบร้อย');
+      updateRoleStatus();
+      renderCalendar();
+    } else {
+      msg.innerHTML = '<span style="color:#ef4444;">รหัส OTP ไม่ถูกต้องหรือหมดอายุ</span>';
+    }
+  } catch(e){
+    msg.innerHTML = '<span style="color:#ef4444;">เกิดข้อผิดพลาดในการตรวจสอบ กรุณาลองใหม่</span>';
+  } finally {
+    btn.innerText = 'ยืนยันรหัส';
+  }
+}
+
+function closeOtpModal(){
+  document.getElementById('otpModal').style.display = 'none';
+  document.getElementById('inpOtpCode').value = '';
+}
+
+// ----- PIN Pad Modal -----
 function openPinModal(){
   enteredPin = '';
   updatePinDisplay();
@@ -450,12 +534,22 @@ function submitPin(){
   }
 }
 
+function updateRoleStatus(){
+  const roleBadge = document.getElementById('calRoleBadge');
+  const btnUnlock = document.getElementById('btnRequestOtpUnlock');
+  if(roleBadge){
+    roleBadge.innerText = isEditMode ? '✏️ โหมดแก้ไข' : '👁️ โหมดดูอย่างเดียว';
+    roleBadge.style.color = isEditMode ? '#22c55e' : 'var(--pri)';
+  }
+  if(btnUnlock){
+    btnUnlock.style.display = isEditMode ? 'none' : 'inline-flex';
+  }
+}
+
 function enterCalendarView(){
   document.getElementById('mainToolView').style.display = 'none';
   document.getElementById('calView').style.display = 'block';
-  const roleBadge = document.getElementById('calRoleBadge');
-  roleBadge.innerText = isEditMode ? '✏️ โหมดแก้ไข' : '👁️ โหมดดูอย่างเดียว';
-  roleBadge.style.color = isEditMode ? '#22c55e' : 'var(--pri)';
+  updateRoleStatus();
   renderCalendar();
 }
 
@@ -482,7 +576,6 @@ function getSavedNames(){
     names = JSON.parse(localStorage.getItem('vending_recent_names') || '[]');
   } catch(e){ names = []; }
 
-  // Scan names from past schedule data as well
   const scheduleData = getStoredSchedule();
   Object.values(scheduleData).forEach(item => {
     [...(item.v8||[]), ...(item.v9||[])].forEach(n => {
@@ -537,10 +630,8 @@ function fillQuickName(name){
   if(!isEditMode) return;
   const inputList = ['inp_v8_1','inp_v8_2','inp_v8_3','inp_v9_1','inp_v9_2','inp_v9_3'];
 
-  // 1. ถ้ามีช่องที่จิ้มโฟกัสไว้ ให้ใส่ช่องนั้น
   if(lastFocusedInput && inputList.includes(lastFocusedInput.id)){
     lastFocusedInput.value = name;
-    // ขยับโฟกัสไปยังช่องถัดไปอัตโนมัติ สะดวกมาก
     const currIdx = inputList.indexOf(lastFocusedInput.id);
     if(currIdx < inputList.length - 1){
       const nextInput = document.getElementById(inputList[currIdx + 1]);
@@ -549,7 +640,6 @@ function fillQuickName(name){
     return;
   }
 
-  // 2. ถ้าไม่ได้จิ้มช่องไหนไว้ หาช่องว่างแรกแล้วใส่ให้เลย
   for(let id of inputList){
     const inp = document.getElementById(id);
     if(!inp.value.trim()){
@@ -610,7 +700,6 @@ function renderCalendar(){
     numSpan.innerText = day;
     cell.appendChild(numSpan);
 
-    // แยก 2 สี: ส้ม = V8, เขียว = V9
     if(filledV8 > 0 || filledV9 > 0){
       const dotsWrap = document.createElement('div');
       dotsWrap.className = 'dots-row';
@@ -685,7 +774,6 @@ function saveDayDetails(){
     document.getElementById('inp_v9_3').value.trim()
   ];
 
-  // จำชื่อใหม่ๆ ลงระบบด่วน
   [...v8, ...v9].filter(Boolean).forEach(n => saveNewName(n));
 
   if(v8.some(Boolean) || v9.some(Boolean)){
