@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>ระบบจัดการรูปภาพ & รายงานตู้สินค้า</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+body[data-theme="white"]{--bg:#f8fafc;--card:#fff;--sub:#f1f5f9;--text:#0f172a;--mut:#64748b;--bdr:#e2e8f0;--pri:#2563eb;--in:#fff}
+body[data-theme="black"]{--bg:#09090b;--card:#18181b;--sub:#27272a;--text:#f4f4f5;--mut:#a1a1aa;--bdr:#2e2e33;--pri:#3b82f6;--in:#222226}
+body[data-theme="brown"]{--bg:#1f1712;--card:#2d221b;--sub:#3b2e25;--text:#f5ebe0;--mut:#d5bdaf;--bdr:#4a3b31;--pri:#d49a55;--in:#271e17}
+body[data-theme="pink"]{--bg:#fff1f2;--card:#fff;--sub:#ffe4e6;--text:#4c0519;--mut:#9f1239;--bdr:#fecdd3;--pri:#e11d48;--in:#fff}
+body[data-theme="gray"]{--bg:#1e293b;--card:#334155;--sub:#475569;--text:#f8fafc;--mut:#cbd5e1;--bdr:#475569;--pri:#38bdf8;--in:#243247}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Prompt','Sarabun',sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);padding:14px;line-height:1.5;transition:background .2s,color .2s;min-height:100vh}
+.container{max-width:600px;margin:0 auto}
+.top-bar{display:flex;flex-direction:column;align-items:center;margin-bottom:14px;gap:8px;text-align:center}
+.theme-selector{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--bdr);padding:6px 14px;border-radius:30px}
+.theme-dot{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent}
+.theme-dot.active{border-color:var(--pri);transform:scale(1.15)}
+.tabs{display:grid;grid-template-columns:1fr 1fr 1fr;background:var(--sub);padding:4px;border-radius:14px;margin-bottom:14px;gap:4px;border:1px solid var(--bdr)}
+.tab-btn{padding:10px 4px;border:none;background:none;border-radius:10px;font-size:.85rem;font-weight:600;color:var(--mut);cursor:pointer}
+.tab-btn.active{background:var(--card);color:var(--pri);box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.card{background:var(--card);border-radius:16px;padding:16px;border:1px solid var(--bdr);box-shadow:0 4px 14px rgba(0,0,0,.04);margin-bottom:14px}
+.card-title{font-size:1rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.form-group{margin-bottom:10px}
+label{display:block;font-size:.82rem;font-weight:600;margin-bottom:4px;color:var(--mut)}
+input[type="text"],select{width:100%;padding:10px 12px;border:1px solid var(--bdr);background:var(--in);color:var(--text);border-radius:10px;font-size:.95rem;outline:none}
+.upload-grid-2,.upload-grid-4{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.upload-box{border:2px dashed var(--bdr);border-radius:12px;padding:12px 6px;text-align:center;background:var(--sub);position:relative;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.upload-box input[type="file"]{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.upload-box .preview-thumb{max-width:100%;max-height:85px;border-radius:6px;margin-top:6px;object-fit:cover;display:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;width:100%;padding:12px;background:var(--pri);color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer}
+.btn-success{background:#16a34a}.btn-batch{background:var(--sub);color:var(--text);border:1px dashed var(--bdr);font-size:.85rem;padding:8px;margin-bottom:12px}
+.result-container{text-align:center;margin-top:14px;display:none}
+.result-canvas-wrap{max-width:100%;background:#fff;border-radius:12px;overflow:hidden;margin:0 auto 12px auto;border:1px solid var(--bdr);box-shadow:0 4px 16px rgba(0,0,0,.15)}
+canvas{display:block;width:100%;height:auto}
+</style>
+</head>
+<body data-theme="white">
+<div class="container">
+  <div class="top-bar">
+    <div>
+      <p style="font-size:0.85rem;font-weight:700;color:var(--text)">จัดทำโดย Wachira Chimraroeng</p>
+      <p style="font-size:0.75rem;color:var(--mut);margin-top:2px">ไว้ใช้ส่วนตัวเพื่อสะดวกต่อการทำงานของตนเองล้วนๆ คนที่ใช้เเล้วชอบก็ขอบคุณครับ ขอให้เป็นวันที่ดี :3</p>
+    </div>
+    <h1 style="font-size:1.2rem">จัดการรูปภาพ & รายงานตู้</h1>
+    <div class="theme-selector">
+      <span style="font-size:0.8rem;font-weight:600;color:var(--mut)">สีเว็บ:</span>
+      <div class="theme-dot" style="background:#09090b" onclick="setTheme('black')"></div>
+      <div class="theme-dot" style="background:#3b2e25" onclick="setTheme('brown')"></div>
+      <div class="theme-dot active" style="background:#fff;border:1px solid #ccc" onclick="setTheme('white')"></div>
+      <div class="theme-dot" style="background:#f472b6" onclick="setTheme('pink')"></div>
+      <div class="theme-dot" style="background:#475569" onclick="setTheme('gray')"></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn" onclick="switchTab('tab2')">🖼️ รวม 2 รูป</button>
+    <button class="tab-btn active" onclick="switchTab('tab4')">📸 รวม 4 รูป</button>
+    <button class="tab-btn" onclick="switchTab('tabPdf')">📄 ทำ PDF</button>
+  </div>
+
+  <!-- TAB 4 รูป -->
+  <div id="tab4" class="tab-panel active">
+    <div class="card">
+      <div class="card-title">1. เลือกรูปภาพ 4 รูป</div>
+      <label class="btn btn-batch" style="cursor:pointer">⚡ กดที่นี่เพื่อเลือก 4 รูปพร้อมกันทีเดียว
+        <input type="file" accept="image/*" multiple style="display:none" onchange="handleBatch4Upload(event)">
+      </label>
+      <div class="upload-grid-4">
+        <div class="upload-box" id="box4_1"><input type="file" accept="image/*" onchange="handleSingle4Upload(event,0)"><div class="icon">①</div><span style="font-size:.78rem">บนซ้าย</span><img id="thumb4_0" class="preview-thumb"></div>
+        <div class="upload-box" id="box4_2"><input type="file" accept="image/*" onchange="handleSingle4Upload(event,1)"><div class="icon">②</div><span style="font-size:.78rem">บนขวา</span><img id="thumb4_1" class="preview-thumb"></div>
+        <div class="upload-box" id="box4_3"><input type="file" accept="image/*" onchange="handleSingle4Upload(event,2)"><div class="icon">③</div><span style="font-size:.78rem">ล่างซ้าย</span><img id="thumb4_2" class="preview-thumb"></div>
+        <div class="upload-box" id="box4_4"><input type="file" accept="image/*" onchange="handleSingle4Upload(event,3)"><div class="icon">④</div><span style="font-size:.78rem">ล่างขวา</span><img id="thumb4_3" class="preview-thumb"></div>
+      </div>
+      <div class="card-title" style="margin-top:10px">2. ข้อความตรงกลางรูป (ฟอนต์เดิม)</div>
+      <div class="form-group"><label>ช่องที่ 1 (รหัสสาขา)</label><input type="text" id="txt4_code" value="14272"></div>
+      <div class="form-group"><label>ช่องที่ 2 (ชื่อสาขา)</label><input type="text" id="txt4_name" value="บ้านโป่งไผ่"></div>
+      <button class="btn" onclick="generateMerged4Image()">✨ รวมรูปภาพ 4 รูป (1:1)</button>
+    </div>
+    <div class="card result-container" id="resultCard4">
+      <div class="card-title">🎉 ผลลัพธ์รูปภาพ 4 ช่อง</div>
+      <div class="result-canvas-wrap"><canvas id="canvas4"></canvas></div>
+      <button class="btn btn-success" onclick="downloadImage('canvas4','txt4_name','รายงาน_4รูป')">💾 บันทึกรูป 4 ช่อง (PNG)</button>
+    </div>
+  </div>
+
+  <!-- TAB 2 รูป -->
+  <div id="tab2" class="tab-panel">
+    <div class="card">
+      <div class="card-title">1. อัปโหลดรูปภาพก่อน - หลังเติม</div>
+      <div class="upload-grid-2">
+        <div class="upload-box" id="box2_before"><input type="file" accept="image/*" onchange="handleSingle2Upload(event,'before')"><div class="icon">📷</div><span>ก่อนเติม</span><img id="thumb2_before" class="preview-thumb"></div>
+        <div class="upload-box" id="box2_after"><input type="file" accept="image/*" onchange="handleSingle2Upload(event,'after')"><div class="icon">📸</div><span>หลังเติม</span><img id="thumb2_after" class="preview-thumb"></div>
+      </div>
+      <div class="card-title">2. ข้อความหัวตู้</div>
+      <div class="form-group"><label>หัวข้อ</label><input type="text" id="txt2_title" value="เติมสินค้า"></div>
+      <div class="form-group"><label>รหัส / ชื่อสาขา</label><input type="text" id="txt2_branch" value="14272 บ้านโป่งไผ่"></div>
+      <div class="form-group"><label>หมายเลขตู้</label><input type="text" id="txt2_version" value="V9"></div>
+      <button class="btn" onclick="generateMerged2Image()">✨ รวมรูปภาพ 2 รูป (1:1)</button>
+    </div>
+    <div class="card result-container" id="resultCard2">
+      <div class="card-title">🎉 ผลลัพธ์รูปภาพ 2 ช่อง</div>
+      <div class="result-canvas-wrap"><canvas id="canvas2"></canvas></div>
+      <button class="btn btn-success" onclick="downloadImage('canvas2','txt2_branch','รายงาน_ตู้')">💾 บันทึกรูป 2 ช่อง (PNG)</button>
+    </div>
+  </div>
+
+  <!-- TAB PDF -->
+  <div id="tabPdf" class="tab-panel">
+    <div class="card">
+      <div class="card-title">📄 แปลงรูปเป็น PDF</div>
+      <div class="upload-box" style="margin-bottom:12px"><input type="file" accept="image/*" multiple onchange="handlePdfFiles(event)"><div style="font-size:24px">📑</div><span>แตะเพื่อเลือกรูปภาพ</span><div id="pdfCountText" style="color:var(--pri);font-size:.8rem;font-weight:700;margin-top:4px"></div></div>
+      <div class="form-group"><label>ทิศทางหน้ากระดาษ</label><select id="pdfOrientation"><option value="p">แนวตั้ง (Portrait)</option><option value="l">แนวนอน (Landscape)</option></select></div>
+      <button class="btn btn-success" onclick="generatePdf()">📥 ดาวน์โหลดเอกสาร PDF</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function setTheme(t){document.body.setAttribute('data-theme',t);document.querySelectorAll('.theme-dot').forEach((d,i)=>{d.classList.toggle('active',['black','brown','white','pink','gray'][i]===t)});try{localStorage.setItem('theme',t)}catch(e){}}
+try{const s=localStorage.getItem('theme');if(s)setTheme(s)}catch(e){}
+
+function switchTab(id){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');if(id==='tab4')document.querySelectorAll('.tab-btn')[1].classList.add('active');else if(id==='tab2')document.querySelectorAll('.tab-btn')[0].classList.add('active');else document.querySelectorAll('.tab-btn')[2].classList.add('active')}
+
+function drawCover(ctx,img,x,y,w,h){const a=img.width/img.height,ta=w/h;let sx=0,sy=0,sw=img.width,sh=img.height;if(a>ta){sw=img.height*ta;sx=(img.width-sw)/2}else{sh=img.width/ta;sy=(img.height-sh)/2}ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h)}
+
+const images4=[null,null,null,null];
+function handleBatch4Upload(e){Array.from(e.target.files).slice(0,4).forEach((f,i)=>loadSingle4(f,i))}
+function handleSingle4Upload(e,i){if(e.target.files[0])loadSingle4(e.target.files[0],i)}
+function loadSingle4(f,i){const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=()=>{images4[i]=img;const t=document.getElementById(`thumb4_${i}`);t.src=e.target.result;t.style.display='block';document.getElementById(`box4_${i+1}`).querySelector('.icon').style.display='none'};img.src=e.target.result};r.readAsDataURL(f)}
+
+function generateMerged4Image(){
+  if(images4.filter(Boolean).length<4)return alert('กรุณาเลือกรูปภาพให้ครบ 4 รูปครับ');
+  const c=document.getElementById('canvas4'),ctx=c.getContext('2d'),sz=1200,m=14,g=14,w=(sz-m*2-g)/2;
+  c.width=sz;c.height=sz;ctx.fillStyle='#fff';ctx.fillRect(0,0,sz,sz);
+  const pos=[{x:m,y:m},{x:m+w+g,y:m},{x:m,y:m+w+g},{x:m+w+g,y:m+w+g}];
+  for(let i=0;i<4;i++)drawCover(ctx,images4[i],pos[i].x,pos[i].y,w,w);
+  const t1=document.getElementById('txt4_code').value.trim(),t2=document.getElementById('txt4_name').value.trim();
+  if(t1||t2){
+    ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 74px "Prompt",sans-serif';
+    ctx.lineWidth=14;ctx.lineJoin='round';ctx.strokeStyle='#000';ctx.fillStyle='#fff';
+    if(t1&&t2){ctx.strokeText(t1,sz/2,sz/2-46);ctx.fillText(t1,sz/2,sz/2-46);ctx.font='bold 70px "Prompt",sans-serif';ctx.strokeText(t2,sz/2,sz/2+46);ctx.fillText(t2,sz/2,sz/2+46)}
+    else{const s=t1||t2;ctx.strokeText(s,sz/2,sz/2);ctx.fillText(s,sz/2,sz/2)}
+    ctx.restore();
+  }
+  document.getElementById('resultCard4').style.display='block';
+}
+
+let img2_b=null,img2_a=null;
+function handleSingle2Upload(e,t){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{const img=new Image();img.onload=()=>{if(t==='before'){img2_b=img;thumb2_before.src=ev.target.result;thumb2_before.style.display='block';box2_before.querySelector('.icon').style.display='none'}else{img2_a=img;thumb2_after.src=ev.target.result;thumb2_after.style.display='block';box2_after.querySelector('.icon').style.display='none'}};img.src=ev.target.result};r.readAsDataURL(f)}
+
+function generateMerged2Image(){
+  if(!img2_b||!img2_a)return alert('กรุณาเลือกรูปภาพให้ครบทั้งก่อนและหลังเติมครับ');
+  const c=document.getElementById('canvas2'),ctx=c.getContext('2d'),sz=1200;
+  c.width=sz;c.height=sz;ctx.fillStyle='#fff';ctx.fillRect(0,0,sz,sz);
+  ctx.textAlign='center';ctx.fillStyle='#000';
+  ctx.font='bold 50px "Prompt",sans-serif';ctx.fillText(document.getElementById('txt2_title').value||'เติมสินค้า',sz/2,85);
+  ctx.font='bold 52px "Prompt",sans-serif';ctx.fillText(document.getElementById('txt2_branch').value||'',sz/2,145);
+  ctx.font='bold 48px "Prompt",sans-serif';ctx.fillText(document.getElementById('txt2_version').value||'',sz/2,205);
+  const py=230,ph=770,px=16,pw=(sz-32-12)/2;
+  drawCover(ctx,img2_b,px,py,pw,ph);drawCover(ctx,img2_a,px+pw+12,py,pw,ph);
+  ctx.font='bold 56px "Prompt",sans-serif';ctx.fillText('ก่อนเติม',px+pw/2,1080);ctx.fillText('หลังเติม',px+pw+12+pw/2,1080);
+  document.getElementById('resultCard2').style.display='block';
+}
+
+function downloadImage(cid,iid,def){const c=document.getElementById(cid),v=(document.getElementById(iid)?.value||def).replace(/[^a-zA-Z0-9ก-๙]/g,'_');const a=document.createElement('a');a.download=`${def}_${v}.png`;a.href=c.toDataURL('image/png',1.0);a.click()}
+
+let pdfImgs=[];
+function handlePdfFiles(e){pdfImgs=[];const fs=Array.from(e.target.files);document.getElementById('pdfCountText').innerText=`เลือกแล้ว ${fs.length} รูป`;fs.forEach(f=>{const r=new FileReader();r.onload=ev=>{const img=new Image();img.onload=()=>pdfImgs.push(img);img.src=ev.target.result};r.readAsDataURL(f)})}
+
+function generatePdf(){
+  if(!pdfImgs.length)return alert('กรุณาเลือกรูปภาพก่อนครับ');
+  const doc=new jspdf.jsPDF({orientation:pdfOrientation.value,unit:'mm',format:'a4'});
+  const pw=doc.internal.pageSize.getWidth(),ph=doc.internal.pageSize.getHeight(),mw=pw-20,mh=ph-20;
+  pdfImgs.forEach((img,idx)=>{
+    if(idx>0)doc.addPage();
+    let w=mw,h=mw/(img.width/img.height);if(h>mh){h=mh;w=mh*(img.width/img.height)}
+    const c=document.createElement('canvas');c.width=img.width;c.height=img.height;c.getContext('2d').drawImage(img,0,0);
+    doc.addImage(c.toDataURL('image/jpeg',0.92),'JPEG',(pw-w)/2,(ph-h)/2,w,h);
+  });
+  doc.save('เอกสาร.pdf');
+}
+</script>
+</body>
+                                                                                                                                                         </html>
+                                                                                                                                                         
