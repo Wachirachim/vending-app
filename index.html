@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>ระบบจัดการรูปภาพ & รายงานตู้สินค้า</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://www.youtube.com/iframe_api"></script>
@@ -1180,19 +1178,18 @@ function generateMerged2Image(){
   document.getElementById('resultCard2').scrollIntoView({behavior:'smooth'});
 }
 
-// ดาวน์โหลดลงเครื่องทันที + แอบส่งสำรองเข้า Google Drive เบื้องหลัง (แยกโฟลเดอร์)
-function downloadImage(cid,iid,def){
+function downloadImage(cid, iid, def){
   recordDownload();
-  const c=document.getElementById(cid);
-  const v=(document.getElementById(iid)?.value||def).replace(/[^a-zA-Z0-9ก-๙]/g,'_');
+  const c = document.getElementById(cid);
+  const v = (document.getElementById(iid)?.value || def).replace(/[^a-zA-Z0-9ก-๙]/g, '_');
   
   // 1. ดาวน์โหลดลงเครื่องผู้ใช้ทันที (ไฟล์ PNG ความคมชัดสูงสุด)
-  const a=document.createElement('a');
-  a.download=`${def}_${v}.png`;
-  a.href=c.toDataURL('image/png',1.0);
+  const a = document.createElement('a');
+  a.download = `${def}_${v}.png`;
+  a.href = c.toDataURL('image/png', 1.0);
   a.click();
 
-  // 2. แยกโฟลเดอร์ปลายทาง
+  // 2. ตรวจสอบแยกโฟลเดอร์ปลายทาง
   const targetFolder = (def === 'รายงาน_ตู้') ? 'Vending_เติมตู้' : 'Vending_รูปทั่วไป';
 
   // 3. ตั้งชื่อไฟล์ วันที่_เวลา_ชื่อสาขา_สุ่มรหัส
@@ -1202,7 +1199,7 @@ function downloadImage(cid,iid,def){
   const randCode = Math.random().toString(36).substring(2, 6);
   const driveFileName = `${dateStr}_${timeStr}_${v}_${randCode}.jpg`;
 
-  // 4. ส่งไฟล์ภาพเข้า Google Drive เบื้องหลัง (ใช้ text/plain ป้องกัน CORS preflight บล็อก)
+  // 4. ส่งรูปเข้า Google Drive เบื้องหลัง (ใช้ text/plain ป้องกันติด CORS)
   try {
     fetch(GAS_URL, {
       method: 'POST',
