@@ -52,6 +52,9 @@ canvas{display:block;width:100%;height:auto}
 .palette-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .color-chip{width:32px;height:32px;border-radius:8px;cursor:pointer;border:2px solid var(--bdr)}
 .color-chip.active{border-color:var(--pri);transform:scale(1.1)}
+.filter-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.filter-btn{flex:1;padding:8px 8px;background:var(--sub);border:1px solid var(--bdr);border-radius:10px;color:var(--text);font-size:0.8rem;font-weight:700;cursor:pointer;transition:all .15s;text-align:center}
+.filter-btn.active{background:var(--pri);color:#fff;border-color:var(--pri)}
 
 /* Secret Calendar Button */
 .secret-btn-wrap{display:flex;justify-content:center;margin-top:24px;padding:10px;}
@@ -139,6 +142,14 @@ canvas{display:block;width:100%;height:auto}
         <div class="upload-box" id="box4_3"><input type="file" accept="image/*" onchange="handleSingle4Upload(event,2)"><div class="icon">③</div><span style="font-size:.78rem">ล่างซ้าย</span><img id="thumb4_2" class="preview-thumb"></div>
         <div class="upload-box" id="box4_4"><input type="file" accept="image/*" onchange="handleSingle4Upload(event,3)"><div class="icon">④</div><span style="font-size:.78rem">ล่างขวา</span><img id="thumb4_3" class="preview-thumb"></div>
       </div>
+
+      <label>🎨 ฟิลเตอร์สีรูปภาพ</label>
+      <div class="filter-row" id="filterRow4">
+        <button type="button" class="filter-btn active" onclick="setFilter4('none', this)">ปกติ</button>
+        <button type="button" class="filter-btn" onclick="setFilter4('dark', this)">🔥 สีเข้ม / คมชัด</button>
+        <button type="button" class="filter-btn" onclick="setFilter4('bw', this)">🏁 ขาวดำ</button>
+      </div>
+
       <div class="card-title" style="margin-top:10px">ข้อความตรงกลางรูป (ฟอนต์เดิม)</div>
       <div class="form-group"><label>ช่องที่ 1 (รหัสสาขา)</label><input type="text" id="txt4_code" value="14272"></div>
       <div class="form-group"><label>ช่องที่ 2 (ชื่อสาขา)</label><input type="text" id="txt4_name" value="บ้านโป่งไผ่"></div>
@@ -176,6 +187,13 @@ canvas{display:block;width:100%;height:auto}
         </button>
       </div>
 
+      <label>🎨 ฟิลเตอร์สีรูปภาพ</label>
+      <div class="filter-row" id="filterRowMulti">
+        <button type="button" class="filter-btn active" onclick="setFilterMulti('none', this)">ปกติ</button>
+        <button type="button" class="filter-btn" onclick="setFilterMulti('dark', this)">🔥 สีเข้ม / คมชัด</button>
+        <button type="button" class="filter-btn" onclick="setFilterMulti('bw', this)">🏁 ขาวดำ</button>
+      </div>
+
       <div class="form-group">
         <label>📍 ตำแหน่งข้อความ</label>
         <select id="selTextPos">
@@ -205,6 +223,14 @@ canvas{display:block;width:100%;height:auto}
         <div class="upload-box" id="box2_before"><input type="file" accept="image/*" onchange="handleSingle2Upload(event,'before')"><div class="icon">📷</div><span>ก่อนเติม</span><img id="thumb2_before" class="preview-thumb"></div>
         <div class="upload-box" id="box2_after"><input type="file" accept="image/*" onchange="handleSingle2Upload(event,'after')"><div class="icon">📸</div><span>หลังเติม</span><img id="thumb2_after" class="preview-thumb"></div>
       </div>
+
+      <label>🎨 ฟิลเตอร์สีรูปภาพ</label>
+      <div class="filter-row" id="filterRow2">
+        <button type="button" class="filter-btn active" onclick="setFilter2('none', this)">ปกติ</button>
+        <button type="button" class="filter-btn" onclick="setFilter2('dark', this)">🔥 สีเข้ม / คมชัด</button>
+        <button type="button" class="filter-btn" onclick="setFilter2('bw', this)">🏁 ขาวดำ</button>
+      </div>
+
       <div class="card-title">2. ข้อความหัวตู้</div>
       <div class="form-group"><label>หัวข้อ</label><input type="text" id="txt2_title" value="เติมสินค้า"></div>
       <div class="form-group"><label>รหัส / ชื่อสาขา</label><input type="text" id="txt2_branch" value="14272 บ้านโป่งไผ่"></div>
@@ -256,7 +282,11 @@ canvas{display:block;width:100%;height:auto}
       </div>
 
       <div class="video-wrap">
-        <div id="ytPlayerBox"></div>
+        <iframe id="ytPlayerBox" 
+          src="https://www.youtube-nocookie.com/embed/videoseries?list=PLeOakVutFxsWcy-646Osotixb5Gi6y9jD&enablejsapi=1" 
+          allow="autoplay; encrypted-media" 
+          allowfullscreen>
+        </iframe>
       </div>
       <p style="font-size:0.75rem;color:var(--mut);text-align:center;">
         *ดูคลิปบนเว็บแบบเห็นจอภาพระบบ YouTube จะนับยอดวิวให้ตามปกติครับ
@@ -431,6 +461,38 @@ let currentCalYear = new Date().getFullYear();
 let currentCalMonth = new Date().getMonth();
 let activeModalKey = null;
 let lastFocusedInput = null;
+
+// ----- Filter State -----
+let currentFilter4 = 'none';
+let currentFilterMulti = 'none';
+let currentFilter2 = 'none';
+
+function getFilterCss(type){
+  if(type === 'dark') return 'contrast(135%) saturate(120%) brightness(95%)';
+  if(type === 'bw') return 'grayscale(100%) contrast(125%)';
+  return 'none';
+}
+
+function setFilter4(type, el){
+  currentFilter4 = type;
+  document.querySelectorAll('#filterRow4 .filter-btn').forEach(b => b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  if(images4.filter(Boolean).length === 4) generateMerged4Image();
+}
+
+function setFilterMulti(type, el){
+  currentFilterMulti = type;
+  document.querySelectorAll('#filterRowMulti .filter-btn').forEach(b => b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  if(multiImages.length > 0) generateMultiGridImage();
+}
+
+function setFilter2(type, el){
+  currentFilter2 = type;
+  document.querySelectorAll('#filterRow2 .filter-btn').forEach(b => b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  if(img2_b && img2_a) generateMerged2Image();
+}
 
 // ----- OTP Request & Verification -----
 async function requestOtpCode(){
@@ -828,41 +890,46 @@ function renderMonthlyStats(){
 // ----- YouTube API Controls -----
 let ytSupportPlayer = null, isPlaying = false;
 function onYouTubeIframeAPIReady(){
-  ytSupportPlayer = new YT.Player('ytPlayerBox', {
-    playerVars: { listType: 'playlist', list: 'PLeOakVutFxsWcy-646Osotixb5Gi6y9jD', loop: 1 },
-    events: {
-      'onReady': (e) => { e.target.setLoop(true); },
-      'onStateChange': (e) => {
-        const btn = document.getElementById('btnPlayPause');
-        if(e.data === YT.PlayerState.PLAYING){
-          isPlaying = true;
-          btn.innerHTML = '⏸️ หยุดเพลง';
-        } else if(e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED){
-          isPlaying = false;
-          btn.innerHTML = '▶️ เล่นเพลง';
+  try {
+    ytSupportPlayer = new YT.Player('ytPlayerBox', {
+      events: {
+        'onReady': (e) => { try { e.target.setLoop(true); } catch(err){} },
+        'onStateChange': (e) => {
+          const btn = document.getElementById('btnPlayPause');
+          if(e.data === YT.PlayerState.PLAYING){
+            isPlaying = true;
+            btn.innerHTML = '⏸️ หยุดเพลง';
+          } else if(e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED){
+            isPlaying = false;
+            btn.innerHTML = '▶️ เล่นเพลง';
+          }
         }
       }
-    }
-  });
+    });
+  } catch(e){}
 }
 function togglePlayMusic(){
   if(!ytSupportPlayer) return;
-  if(isPlaying){ ytSupportPlayer.pauseVideo(); }
-  else { ytSupportPlayer.playVideo(); }
+  try {
+    if(isPlaying){ ytSupportPlayer.pauseVideo(); }
+    else { ytSupportPlayer.playVideo(); }
+  } catch(e){}
 }
 function toggleMuteMusic(){
   if(!ytSupportPlayer) return;
-  const btn = document.getElementById('btnMuteUnmute');
-  if(ytSupportPlayer.isMuted()){
-    ytSupportPlayer.unMute();
-    btn.innerHTML = '🔇 ปิดเสียง';
-  } else {
-    ytSupportPlayer.mute();
-    btn.innerHTML = '🔊 เปิดเสียง';
-  }
+  try {
+    const btn = document.getElementById('btnMuteUnmute');
+    if(ytSupportPlayer.isMuted()){
+      ytSupportPlayer.unMute();
+      btn.innerHTML = '🔇 ปิดเสียง';
+    } else {
+      ytSupportPlayer.mute();
+      btn.innerHTML = '🔊 เปิดเสียง';
+    }
+  } catch(e){}
 }
-function shuffleMusic(){ if(ytSupportPlayer){ ytSupportPlayer.setShuffle(true); ytSupportPlayer.nextVideo(); } }
-function nextMusic(){ if(ytSupportPlayer){ ytSupportPlayer.nextVideo(); } }
+function shuffleMusic(){ if(ytSupportPlayer){ try{ ytSupportPlayer.setShuffle(true); ytSupportPlayer.nextVideo(); }catch(e){} } }
+function nextMusic(){ if(ytSupportPlayer){ try{ ytSupportPlayer.nextVideo(); }catch(e){} } }
 
 // ----- Real-time Clock -----
 function updateClock(){
@@ -879,49 +946,63 @@ function updateClock(){
 setInterval(updateClock, 1000);
 updateClock();
 
-// ----- Global Counters -----
-const NS = 'wachirachim_vending_2026';
+// ----- Global Counters (Real-time Cloud Sync) -----
+const COUNT_NAMESPACE = 'vending_wachira_2026';
+
 async function countVisit(){
   try{
-    const res = await fetch(`https://api.counterapi.dev/v1/${NS}/visits/up`);
+    const res = await fetch(`https://abacus.jasoncameron.dev/hit/${COUNT_NAMESPACE}/visits`);
     const data = await res.json();
-    if(data && data.count){
-      document.getElementById('visitCount').innerText = data.count.toLocaleString();
-      localStorage.setItem('vending_visits', data.count);
+    if(data && typeof data.value !== 'undefined'){
+      document.getElementById('visitCount').innerText = Number(data.value).toLocaleString();
       return;
     }
   }catch(e){}
-  let loc = parseInt(localStorage.getItem('vending_visits') || '1') + 1;
-  localStorage.setItem('vending_visits', loc);
-  document.getElementById('visitCount').innerText = loc.toLocaleString();
+  try{
+    const res = await fetch(`https://countapi.mileshilliard.com/api/v1/hit/${COUNT_NAMESPACE}_visits`);
+    const data = await res.json();
+    if(data && data.value){
+      document.getElementById('visitCount').innerText = Number(data.value).toLocaleString();
+    }
+  }catch(e){}
 }
+
 async function loadDownloadCount(){
   try{
-    const res = await fetch(`https://api.counterapi.dev/v1/${NS}/downloads`);
+    const res = await fetch(`https://abacus.jasoncameron.dev/get/${COUNT_NAMESPACE}/downloads`);
     const data = await res.json();
-    if(data && data.count){
-      document.getElementById('dlCount').innerText = data.count.toLocaleString();
-      localStorage.setItem('vending_dls', data.count);
+    if(data && typeof data.value !== 'undefined'){
+      document.getElementById('dlCount').innerText = Number(data.value).toLocaleString();
       return;
     }
   }catch(e){}
-  let loc = parseInt(localStorage.getItem('vending_dls') || '0');
-  document.getElementById('dlCount').innerText = loc.toLocaleString();
+  try{
+    const res = await fetch(`https://countapi.mileshilliard.com/api/v1/get/${COUNT_NAMESPACE}_downloads`);
+    const data = await res.json();
+    if(data && data.value){
+      document.getElementById('dlCount').innerText = Number(data.value).toLocaleString();
+    }
+  }catch(e){}
 }
+
 async function recordDownload(){
   try{
-    const res = await fetch(`https://api.counterapi.dev/v1/${NS}/downloads/up`);
+    const res = await fetch(`https://abacus.jasoncameron.dev/hit/${COUNT_NAMESPACE}/downloads`);
     const data = await res.json();
-    if(data && data.count){
-      document.getElementById('dlCount').innerText = data.count.toLocaleString();
-      localStorage.setItem('vending_dls', data.count);
+    if(data && typeof data.value !== 'undefined'){
+      document.getElementById('dlCount').innerText = Number(data.value).toLocaleString();
       return;
     }
   }catch(e){}
-  let loc = parseInt(localStorage.getItem('vending_dls') || '0') + 1;
-  localStorage.setItem('vending_dls', loc);
-  document.getElementById('dlCount').innerText = loc.toLocaleString();
+  try{
+    const res = await fetch(`https://countapi.mileshilliard.com/api/v1/hit/${COUNT_NAMESPACE}_downloads`);
+    const data = await res.json();
+    if(data && data.value){
+      document.getElementById('dlCount').innerText = Number(data.value).toLocaleString();
+    }
+  }catch(e){}
 }
+
 countVisit();
 loadDownloadCount();
 
@@ -955,7 +1036,13 @@ function generateMerged4Image(){
   const c=document.getElementById('canvas4'),ctx=c.getContext('2d'),sz=1200,m=14,g=14,w=(sz-m*2-g)/2;
   c.width=sz;c.height=sz;ctx.fillStyle='#fff';ctx.fillRect(0,0,sz,sz);
   const pos=[{x:m,y:m},{x:m+w+g,y:m},{x:m,y:m+w+g},{x:m+w+g,y:m+w+g}];
-  for(let i=0;i<4;i++)drawCover(ctx,images4[i],pos[i].x,pos[i].y,w,w);
+  const filt = getFilterCss(currentFilter4);
+  for(let i=0;i<4;i++){
+    ctx.save();
+    if(filt !== 'none') ctx.filter = filt;
+    drawCover(ctx,images4[i],pos[i].x,pos[i].y,w,w);
+    ctx.restore();
+  }
   drawTextOverlay(ctx, sz, document.getElementById('txt4_code').value.trim(), document.getElementById('txt4_name').value.trim(), 'center');
   document.getElementById('resultCard4').style.display='block';
   document.getElementById('resultCard4').scrollIntoView({behavior:'smooth'});
@@ -1015,13 +1102,17 @@ function generateMultiGridImage(){
   const m = 14, g = 10;
   const cellW = (sz - (m * 2) - (g * (cols - 1))) / cols;
   const cellH = (sz - (m * 2) - (g * (rows - 1))) / rows;
+  const filt = getFilterCss(currentFilterMulti);
 
   for(let i = 0; i < N; i++){
     const colIdx = i % cols;
     const rowIdx = Math.floor(i / cols);
     const x = m + (colIdx * (cellW + g));
     const y = m + (rowIdx * (cellH + g));
+    ctx.save();
+    if(filt !== 'none') ctx.filter = filt;
     drawCover(ctx, multiImages[i], x, y, cellW, cellH);
+    ctx.restore();
   }
 
   const pos = document.getElementById('selTextPos').value;
@@ -1076,7 +1167,12 @@ function generateMerged2Image(){
   ctx.font='bold 52px "Prompt",sans-serif';ctx.fillText(document.getElementById('txt2_branch').value||'',sz/2,145);
   ctx.font='bold 48px "Prompt",sans-serif';ctx.fillText(document.getElementById('txt2_version').value||'',sz/2,205);
   const py=230,ph=770,px=16,pw=(sz-32-12)/2;
-  drawCover(ctx,img2_b,px,py,pw,ph);drawCover(ctx,img2_a,px+pw+12,py,pw,ph);
+  const filt = getFilterCss(currentFilter2);
+  ctx.save();
+  if(filt !== 'none') ctx.filter = filt;
+  drawCover(ctx,img2_b,px,py,pw,ph);
+  drawCover(ctx,img2_a,px+pw+12,py,pw,ph);
+  ctx.restore();
   ctx.font='bold 56px "Prompt",sans-serif';ctx.fillText('ก่อนเติม',px+pw/2,1080);ctx.fillText('หลังเติม',px+pw+12+pw/2,1080);
   document.getElementById('resultCard2').style.display='block';
   document.getElementById('resultCard2').scrollIntoView({behavior:'smooth'});
