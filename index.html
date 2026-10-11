@@ -38,7 +38,7 @@ input[type="text"],select{width:100%;padding:10px 12px;border:1px solid var(--bd
 .upload-box{border:2px dashed var(--bdr);border-radius:12px;padding:12px 6px;text-align:center;background:var(--sub);position:relative;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .upload-box input[type="file"]{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer}
 .upload-box .preview-thumb{max-width:100%;max-height:85px;border-radius:6px;margin-top:6px;object-fit:cover;display:none}
-.btn{display:inline-flex;align-items:center;justify-content:center;width:100%;padding:12px;background:var(--pri);color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;text-decoration:none;gap:6px}
+.btn{display:inline-flex;align-items:center;justify-content:center;width:100%;padding:11px;background:var(--pri);color:#fff;border:none;border-radius:12px;font-size:.92rem;font-weight:700;cursor:pointer;text-decoration:none;gap:6px}
 .btn:hover{background:var(--pri-h)}
 .btn-success{background:#16a34a}.btn-batch{background:var(--sub);color:var(--text);border:1px dashed var(--bdr);font-size:.85rem;padding:8px;margin-bottom:12px}
 .result-container{text-align:center;margin-top:14px;display:none}
@@ -46,6 +46,7 @@ input[type="text"],select{width:100%;padding:10px 12px;border:1px solid var(--bd
 canvas{display:block;width:100%;height:auto}
 .video-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;border:1px solid var(--bdr);margin-bottom:12px;background:#000}
 .video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.ctrl-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
 </style>
 </head>
 <body data-theme="brown">
@@ -75,15 +76,16 @@ canvas{display:block;width:100%;height:auto}
 
   <div class="tabs">
     <button class="tab-btn" onclick="switchTab('tab2')">🖼️ 2 รูป</button>
-    <button class="tab-btn active" onclick="switchTab('tab4')">📸 4 รูป</button>
+    <button class="tab-btn active" onclick="switchTab('tab4')">📸 4 รูป/หลายรูป</button>
     <button class="tab-btn" onclick="switchTab('tabPdf')">📄 PDF</button>
     <button class="tab-btn" onclick="switchTab('tabMusic')">☕ สนับสนุน</button>
   </div>
 
-  <!-- TAB 4 รูป -->
+  <!-- TAB 4 รูป & หลายรูป -->
   <div id="tab4" class="tab-panel active">
+    <!-- กล่องที่ 1: รวม 4 รูปมาตรฐาน -->
     <div class="card">
-      <div class="card-title">1. เลือกรูปภาพ 4 รูป</div>
+      <div class="card-title">📸 1. รวม 4 รูป (2x2 มาตรฐาน)</div>
       <label class="btn btn-batch" style="cursor:pointer">⚡ กดที่นี่เพื่อเลือก 4 รูปพร้อมกันทีเดียว
         <input type="file" accept="image/*" multiple style="display:none" onchange="handleBatch4Upload(event)">
       </label>
@@ -93,7 +95,7 @@ canvas{display:block;width:100%;height:auto}
         <div class="upload-box" id="box4_3"><input type="file" accept="image/*" onchange="handleSingle4Upload(event,2)"><div class="icon">③</div><span style="font-size:.78rem">ล่างซ้าย</span><img id="thumb4_2" class="preview-thumb"></div>
         <div class="upload-box" id="box4_4"><input type="file" accept="image/*" onchange="handleSingle4Upload(event,3)"><div class="icon">④</div><span style="font-size:.78rem">ล่างขวา</span><img id="thumb4_3" class="preview-thumb"></div>
       </div>
-      <div class="card-title" style="margin-top:10px">2. ข้อความตรงกลางรูป (ฟอนต์เดิม)</div>
+      <div class="card-title" style="margin-top:10px">ข้อความตรงกลางรูป (ฟอนต์เดิม)</div>
       <div class="form-group"><label>ช่องที่ 1 (รหัสสาขา)</label><input type="text" id="txt4_code" value="14272"></div>
       <div class="form-group"><label>ช่องที่ 2 (ชื่อสาขา)</label><input type="text" id="txt4_name" value="บ้านโป่งไผ่"></div>
       <button class="btn" onclick="generateMerged4Image()">✨ รวมรูปภาพ 4 รูป (1:1)</button>
@@ -102,6 +104,25 @@ canvas{display:block;width:100%;height:auto}
       <div class="card-title">🎉 ผลลัพธ์รูปภาพ 4 ช่อง</div>
       <div class="result-canvas-wrap"><canvas id="canvas4"></canvas></div>
       <button class="btn btn-success" onclick="downloadImage('canvas4','txt4_name','รายงาน_4รูป')">💾 บันทึกรูป 4 ช่อง (PNG)</button>
+    </div>
+
+    <!-- กล่องที่ 2: รวมหลายรูปอิสระ (1, 2, 3... 10+ รูป) จัดรูปเองอัตโนมัติ -->
+    <div class="card" style="border: 2px dashed var(--pri);">
+      <div class="card-title">🧩 2. รวมหลายรูปอิสระ (ใส่กี่รูปก็ได้ 1-10+ รูป จัดตารางอัตโนมัติ)</div>
+      <div class="upload-box" style="margin-bottom:12px;min-height:100px;">
+        <input type="file" accept="image/*" multiple onchange="handleMultiGridUpload(event)">
+        <div style="font-size:26px">🖼️</div>
+        <span style="font-weight:700">แตะเพื่อเลือกหลายรูป (1 ถึง 10+ รูป)</span>
+        <div id="multiCountText" style="color:var(--pri);font-size:.82rem;font-weight:700;margin-top:4px"></div>
+      </div>
+      <div class="form-group"><label>ข้อความบรรทัด 1 (ถ้ามี)</label><input type="text" id="txtMulti_1" placeholder="เช่น 14272"></div>
+      <div class="form-group"><label>ข้อความบรรทัด 2 (ถ้ามี)</label><input type="text" id="txtMulti_2" placeholder="เช่น บ้านโป่งไผ่"></div>
+      <button class="btn" onclick="generateMultiGridImage()">✨ รวมรูปหลายรูป (จัดตารางอัตโนมัติ 1:1)</button>
+    </div>
+    <div class="card result-container" id="resultCardMulti">
+      <div class="card-title">🎉 ผลลัพธ์รูปภาพรวมหลายช่อง</div>
+      <div class="result-canvas-wrap"><canvas id="canvasMulti"></canvas></div>
+      <button class="btn btn-success" onclick="downloadImage('canvasMulti','txtMulti_2','รายงาน_หลายรูป')">💾 บันทึกรูปรวม (PNG)</button>
     </div>
   </div>
 
@@ -144,22 +165,27 @@ canvas{display:block;width:100%;height:auto}
         เพลงที่ผมทำเอง ไม่มีลิขสิทธิ์ เปิดฟังเพลินๆ ระหว่างทำงานได้เลยครับ หรือกดเปิดบน YouTube เพื่อช่วยเพิ่มยอดวิวได้โดยตรง ขอบคุณมากๆ ครับ :3
       </p>
 
-      <!-- ปุ่มเข้า YouTube โดยตรงเพื่อดันยอดวิว -->
       <a href="https://youtube.com/playlist?list=PLeOakVutFxsWcy-646Osotixb5Gi6y9jD" target="_blank" rel="noopener" class="btn" style="background:#cc0000;color:#fff;margin-bottom:12px;">
         ▶️ เปิดฟังบนแอป YouTube (ช่วยนับยอดวิวเต็มๆ)
       </a>
 
-      <!-- ปุ่มสุ่มเพลง -->
-      <div style="display:flex;gap:8px;margin-bottom:14px;">
-        <button class="btn" style="flex:1;background:var(--sub);color:var(--text);border:1px solid var(--bdr);" onclick="shuffleMusic()">
-          🔀 สุ่มเพลง (Shuffle)
+      <!-- แถบปุ่มควบคุมเพลง: เล่น/หยุด, ปิด/เปิดเสียง, สุ่ม, ถัดไป -->
+      <div class="ctrl-grid">
+        <button class="btn" id="btnPlayPause" style="background:var(--sub);color:var(--text);border:1px solid var(--bdr);" onclick="togglePlayMusic()">
+          ▶️ เล่นเพลง
         </button>
-        <button class="btn" style="flex:1;background:var(--sub);color:var(--text);border:1px solid var(--bdr);" onclick="nextMusic()">
+        <button class="btn" id="btnMuteUnmute" style="background:var(--sub);color:var(--text);border:1px solid var(--bdr);" onclick="toggleMuteMusic()">
+          🔇 ปิดเสียง
+        </button>
+        <button class="btn" style="background:var(--sub);color:var(--text);border:1px solid var(--bdr);" onclick="shuffleMusic()">
+          🔀 สุ่มเพลง
+        </button>
+        <button class="btn" style="background:var(--sub);color:var(--text);border:1px solid var(--bdr);" onclick="nextMusic()">
           ⏭️ เพลงถัดไป
         </button>
       </div>
 
-      <!-- กรอบแสดงวิดีโอ YouTube แบบมาตรฐาน (เห็นจอชัดเจน นับวิวได้) -->
+      <!-- กรอบแสดงวิดีโอ YouTube -->
       <div class="video-wrap">
         <div id="ytPlayerBox"></div>
       </div>
@@ -171,25 +197,44 @@ canvas{display:block;width:100%;height:auto}
 </div>
 
 <script>
-// ----- YouTube API for Support Tab -----
-let ytSupportPlayer = null;
+// ----- YouTube API Controls -----
+let ytSupportPlayer = null, isPlaying = false, isMuted = false;
 function onYouTubeIframeAPIReady(){
   ytSupportPlayer = new YT.Player('ytPlayerBox', {
     playerVars: { listType: 'playlist', list: 'PLeOakVutFxsWcy-646Osotixb5Gi6y9jD', loop: 1 },
     events: {
-      'onReady': (e) => { e.target.setLoop(true); }
+      'onReady': (e) => { e.target.setLoop(true); },
+      'onStateChange': (e) => {
+        const btn = document.getElementById('btnPlayPause');
+        if(e.data === YT.PlayerState.PLAYING){
+          isPlaying = true;
+          btn.innerHTML = '⏸️ หยุดเพลง';
+        } else if(e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED){
+          isPlaying = false;
+          btn.innerHTML = '▶️ เล่นเพลง';
+        }
+      }
     }
   });
 }
-function shuffleMusic(){
+function togglePlayMusic(){
   if(!ytSupportPlayer) return;
-  ytSupportPlayer.setShuffle(true);
-  ytSupportPlayer.nextVideo();
+  if(isPlaying){ ytSupportPlayer.pauseVideo(); }
+  else { ytSupportPlayer.playVideo(); }
 }
-function nextMusic(){
+function toggleMuteMusic(){
   if(!ytSupportPlayer) return;
-  ytSupportPlayer.nextVideo();
+  const btn = document.getElementById('btnMuteUnmute');
+  if(ytSupportPlayer.isMuted()){
+    ytSupportPlayer.unMute();
+    btn.innerHTML = '🔇 ปิดเสียง';
+  } else {
+    ytSupportPlayer.mute();
+    btn.innerHTML = '🔊 เปิดเสียง';
+  }
 }
+function shuffleMusic(){ if(ytSupportPlayer){ ytSupportPlayer.setShuffle(true); ytSupportPlayer.nextVideo(); } }
+function nextMusic(){ if(ytSupportPlayer){ ytSupportPlayer.nextVideo(); } }
 
 // ----- Real-time Clock -----
 function updateClock(){
@@ -222,7 +267,6 @@ async function countVisit(){
   localStorage.setItem('vending_visits', loc);
   document.getElementById('visitCount').innerText = loc.toLocaleString();
 }
-
 async function loadDownloadCount(){
   try{
     const res = await fetch(`https://api.counterapi.dev/v1/${NS}/downloads`);
@@ -236,7 +280,6 @@ async function loadDownloadCount(){
   let loc = parseInt(localStorage.getItem('vending_dls') || '0');
   document.getElementById('dlCount').innerText = loc.toLocaleString();
 }
-
 async function recordDownload(){
   try{
     const res = await fetch(`https://api.counterapi.dev/v1/${NS}/downloads/up`);
@@ -273,6 +316,7 @@ function switchTab(id){
 
 function drawCover(ctx,img,x,y,w,h){const a=img.width/img.height,ta=w/h;let sx=0,sy=0,sw=img.width,sh=img.height;if(a>ta){sw=img.height*ta;sx=(img.width-sw)/2}else{sh=img.width/ta;sy=(img.height-sh)/2}ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h)}
 
+// 4 รูป มาตรฐาน
 const images4=[null,null,null,null];
 function handleBatch4Upload(e){Array.from(e.target.files).slice(0,4).forEach((f,i)=>loadSingle4(f,i))}
 function handleSingle4Upload(e,i){if(e.target.files[0])loadSingle4(e.target.files[0],i)}
@@ -284,20 +328,75 @@ function generateMerged4Image(){
   c.width=sz;c.height=sz;ctx.fillStyle='#fff';ctx.fillRect(0,0,sz,sz);
   const pos=[{x:m,y:m},{x:m+w+g,y:m},{x:m,y:m+w+g},{x:m+w+g,y:m+w+g}];
   for(let i=0;i<4;i++)drawCover(ctx,images4[i],pos[i].x,pos[i].y,w,w);
-  const t1=document.getElementById('txt4_code').value.trim(),t2=document.getElementById('txt4_name').value.trim();
-  if(t1||t2){
-    ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 74px "Prompt",sans-serif';
-    ctx.lineWidth=14;ctx.lineJoin='round';ctx.strokeStyle='#000';ctx.fillStyle='#fff';
-    if(t1&&t2){ctx.strokeText(t1,sz/2,sz/2-46);ctx.fillText(t1,sz/2,sz/2-46);ctx.font='bold 70px "Prompt",sans-serif';ctx.strokeText(t2,sz/2,sz/2+46);ctx.fillText(t2,sz/2,sz/2+46)}
-    else{const s=t1||t2;ctx.strokeText(s,sz/2,sz/2);ctx.fillText(s,sz/2,sz/2)}
-    ctx.restore();
-  }
+  drawCenterText(ctx, sz, document.getElementById('txt4_code').value.trim(), document.getElementById('txt4_name').value.trim());
   document.getElementById('resultCard4').style.display='block';
+  document.getElementById('resultCard4').scrollIntoView({behavior:'smooth'});
 }
 
+// รวมหลายรูปอิสระ (1 - 10+ รูป จัดตารางอัตโนมัติ)
+let multiImages = [];
+function handleMultiGridUpload(e){
+  const files = Array.from(e.target.files);
+  if(!files.length) return;
+  multiImages = [];
+  document.getElementById('multiCountText').innerText = `เลือกแล้ว ${files.length} รูป (ระบบจะจัดแถวอัตโนมัติ)`;
+  files.forEach(f => {
+    const r = new FileReader();
+    r.onload = ev => {
+      const img = new Image();
+      img.onload = () => multiImages.push(img);
+      img.src = ev.target.result;
+    };
+    r.readAsDataURL(f);
+  });
+}
+
+function generateMultiGridImage(){
+  const N = multiImages.length;
+  if(N === 0) return alert('กรุณาเลือกรูปภาพอย่างน้อย 1 รูปครับ');
+  const c = document.getElementById('canvasMulti'), ctx = c.getContext('2d'), sz = 1200;
+  c.width = sz; c.height = sz;
+  ctx.fillStyle = '#fff'; ctx.fillRect(0,0,sz,sz);
+
+  const cols = Math.ceil(Math.sqrt(N));
+  const rows = Math.ceil(N / cols);
+  const m = 14, g = 10;
+  const cellW = (sz - (m * 2) - (g * (cols - 1))) / cols;
+  const cellH = (sz - (m * 2) - (g * (rows - 1))) / rows;
+
+  for(let i = 0; i < N; i++){
+    const colIdx = i % cols;
+    const rowIdx = Math.floor(i / cols);
+    const x = m + (colIdx * (cellW + g));
+    const y = m + (rowIdx * (cellH + g));
+    drawCover(ctx, multiImages[i], x, y, cellW, cellH);
+  }
+
+  drawCenterText(ctx, sz, document.getElementById('txtMulti_1').value.trim(), document.getElementById('txtMulti_2').value.trim());
+  document.getElementById('resultCardMulti').style.display = 'block';
+  document.getElementById('resultCardMulti').scrollIntoView({behavior:'smooth'});
+}
+
+function drawCenterText(ctx, sz, t1, t2){
+  if(t1 || t2){
+    ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = 'bold 74px "Prompt", sans-serif';
+    ctx.lineWidth = 14; ctx.lineJoin = 'round'; ctx.strokeStyle = '#000'; ctx.fillStyle = '#fff';
+    if(t1 && t2){
+      ctx.strokeText(t1, sz/2, sz/2 - 46); ctx.fillText(t1, sz/2, sz/2 - 46);
+      ctx.font = 'bold 70px "Prompt", sans-serif';
+      ctx.strokeText(t2, sz/2, sz/2 + 46); ctx.fillText(t2, sz/2, sz/2 + 46);
+    } else {
+      const s = t1 || t2;
+      ctx.strokeText(s, sz/2, sz/2); ctx.fillText(s, sz/2, sz/2);
+    }
+    ctx.restore();
+  }
+}
+
+// 2 รูป
 let img2_b=null,img2_a=null;
 function handleSingle2Upload(e,t){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{const img=new Image();img.onload=()=>{if(t==='before'){img2_b=img;thumb2_before.src=ev.target.result;thumb2_before.style.display='block';box2_before.querySelector('.icon').style.display='none'}else{img2_a=img;thumb2_after.src=ev.target.result;thumb2_after.style.display='block';box2_after.querySelector('.icon').style.display='none'}};img.src=ev.target.result};r.readAsDataURL(f)}
-
 function generateMerged2Image(){
   if(!img2_b||!img2_a)return alert('กรุณาเลือกรูปภาพให้ครบทั้งก่อนและหลังเติมครับ');
   const c=document.getElementById('canvas2'),ctx=c.getContext('2d'),sz=1200;
@@ -310,6 +409,7 @@ function generateMerged2Image(){
   drawCover(ctx,img2_b,px,py,pw,ph);drawCover(ctx,img2_a,px+pw+12,py,pw,ph);
   ctx.font='bold 56px "Prompt",sans-serif';ctx.fillText('ก่อนเติม',px+pw/2,1080);ctx.fillText('หลังเติม',px+pw+12+pw/2,1080);
   document.getElementById('resultCard2').style.display='block';
+  document.getElementById('resultCard2').scrollIntoView({behavior:'smooth'});
 }
 
 function downloadImage(cid,iid,def){
@@ -320,7 +420,6 @@ function downloadImage(cid,iid,def){
 
 let pdfImgs=[];
 function handlePdfFiles(e){pdfImgs=[];const fs=Array.from(e.target.files);document.getElementById('pdfCountText').innerText=`เลือกแล้ว ${fs.length} รูป`;fs.forEach(f=>{const r=new FileReader();r.onload=ev=>{const img=new Image();img.onload=()=>pdfImgs.push(img);img.src=ev.target.result};r.readAsDataURL(f)})}
-
 function generatePdf(){
   if(!pdfImgs.length)return alert('กรุณาเลือกรูปภาพก่อนครับ');
   recordDownload();
