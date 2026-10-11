@@ -8,13 +8,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://www.youtube.com/iframe_api"></script>
 <style>
-body[data-theme="white"]{--bg:#f8fafc;--card:#fff;--sub:#f1f5f9;--text:#0f172a;--mut:#64748b;--bdr:#e2e8f0;--pri:#2563eb;--in:#fff}
-body[data-theme="black"]{--bg:#09090b;--card:#18181b;--sub:#27272a;--text:#f4f4f5;--mut:#a1a1aa;--bdr:#2e2e33;--pri:#3b82f6;--in:#222226}
-body[data-theme="brown"]{--bg:#1f1712;--card:#2d221b;--sub:#3b2e25;--text:#f5ebe0;--mut:#d5bdaf;--bdr:#4a3b31;--pri:#d49a55;--in:#271e17}
-body[data-theme="pink"]{--bg:#fff1f2;--card:#fff;--sub:#ffe4e6;--text:#4c0519;--mut:#9f1239;--bdr:#fecdd3;--pri:#e11d48;--in:#fff}
-body[data-theme="gray"]{--bg:#1e293b;--card:#334155;--sub:#475569;--text:#f8fafc;--mut:#cbd5e1;--bdr:#475569;--pri:#38bdf8;--in:#243247}
+body[data-theme="brown"]{--bg:#1a120b;--card:#2b1e16;--sub:#3c2a1e;--text:#f5ebe0;--mut:#d5bdaf;--bdr:#4e382b;--pri:#d49a55;--pri-h:#ba813e;--in:#221811}
+body[data-theme="white"]{--bg:#f8fafc;--card:#fff;--sub:#f1f5f9;--text:#0f172a;--mut:#64748b;--bdr:#e2e8f0;--pri:#2563eb;--pri-h:#1d4ed8;--in:#fff}
+body[data-theme="black"]{--bg:#09090b;--card:#18181b;--sub:#27272a;--text:#f4f4f5;--mut:#a1a1aa;--bdr:#2e2e33;--pri:#3b82f6;--pri-h:#2563eb;--in:#222226}
+body[data-theme="pink"]{--bg:#fff1f2;--card:#fff;--sub:#ffe4e6;--text:#4c0519;--mut:#9f1239;--bdr:#fecdd3;--pri:#e11d48;--pri-h:#be123c;--in:#fff}
+body[data-theme="gray"]{--bg:#1e293b;--card:#334155;--sub:#475569;--text:#f8fafc;--mut:#cbd5e1;--bdr:#475569;--pri:#38bdf8;--pri-h:#0ea5e9;--in:#243247}
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Prompt','Sarabun',sans-serif;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg);color:var(--text);padding:14px;padding-bottom:70px;line-height:1.5;transition:background .2s,color .2s;min-height:100vh}
+body{background:var(--bg);color:var(--text);padding:14px;line-height:1.5;transition:background .2s,color .2s;min-height:100vh}
 .container{max-width:600px;margin:0 auto}
 .top-bar{display:flex;flex-direction:column;align-items:center;margin-bottom:14px;gap:8px;text-align:center}
 .stats-box{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:8px 14px;width:100%;max-width:420px;margin:4px auto;box-shadow:0 2px 8px rgba(0,0,0,.04);text-align:center}
@@ -25,8 +25,8 @@ body{background:var(--bg);color:var(--text);padding:14px;padding-bottom:70px;lin
 .theme-selector{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--bdr);padding:6px 14px;border-radius:30px}
 .theme-dot{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent}
 .theme-dot.active{border-color:var(--pri);transform:scale(1.15)}
-.tabs{display:grid;grid-template-columns:1fr 1fr 1fr;background:var(--sub);padding:4px;border-radius:14px;margin-bottom:14px;gap:4px;border:1px solid var(--bdr)}
-.tab-btn{padding:10px 4px;border:none;background:none;border-radius:10px;font-size:.85rem;font-weight:600;color:var(--mut);cursor:pointer}
+.tabs{display:grid;grid-template-columns:1fr 1fr 1fr 1.1fr;background:var(--sub);padding:4px;border-radius:14px;margin-bottom:14px;gap:4px;border:1px solid var(--bdr)}
+.tab-btn{padding:10px 2px;border:none;background:none;border-radius:10px;font-size:.82rem;font-weight:600;color:var(--mut);cursor:pointer;text-align:center}
 .tab-btn.active{background:var(--card);color:var(--pri);box-shadow:0 2px 6px rgba(0,0,0,.08)}
 .tab-panel{display:none}.tab-panel.active{display:block}
 .card{background:var(--card);border-radius:16px;padding:16px;border:1px solid var(--bdr);box-shadow:0 4px 14px rgba(0,0,0,.04);margin-bottom:14px}
@@ -38,17 +38,17 @@ input[type="text"],select{width:100%;padding:10px 12px;border:1px solid var(--bd
 .upload-box{border:2px dashed var(--bdr);border-radius:12px;padding:12px 6px;text-align:center;background:var(--sub);position:relative;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .upload-box input[type="file"]{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer}
 .upload-box .preview-thumb{max-width:100%;max-height:85px;border-radius:6px;margin-top:6px;object-fit:cover;display:none}
-.btn{display:inline-flex;align-items:center;justify-content:center;width:100%;padding:12px;background:var(--pri);color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer}
+.btn{display:inline-flex;align-items:center;justify-content:center;width:100%;padding:12px;background:var(--pri);color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;text-decoration:none;gap:6px}
+.btn:hover{background:var(--pri-h)}
 .btn-success{background:#16a34a}.btn-batch{background:var(--sub);color:var(--text);border:1px dashed var(--bdr);font-size:.85rem;padding:8px;margin-bottom:12px}
 .result-container{text-align:center;margin-top:14px;display:none}
 .result-canvas-wrap{max-width:100%;background:#fff;border-radius:12px;overflow:hidden;margin:0 auto 12px auto;border:1px solid var(--bdr);box-shadow:0 4px 16px rgba(0,0,0,.15)}
 canvas{display:block;width:100%;height:auto}
-/* Mini Music Player */
-.mini-player{position:fixed;bottom:12px;right:12px;background:var(--card);border:1px solid var(--bdr);border-radius:30px;padding:6px 14px;box-shadow:0 4px 16px rgba(0,0,0,.18);display:flex;align-items:center;gap:8px;z-index:999}
-.player-btn{background:none;border:none;cursor:pointer;font-size:1rem;color:var(--text);line-height:1;padding:2px}
+.video-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;border:1px solid var(--bdr);margin-bottom:12px;background:#000}
+.video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
 </style>
 </head>
-<body data-theme="white">
+<body data-theme="brown">
 <div class="container">
   <div class="top-bar">
     <div>
@@ -65,18 +65,19 @@ canvas{display:block;width:100%;height:auto}
     <h1 style="font-size:1.2rem">จัดการรูปภาพ & รายงานตู้</h1>
     <div class="theme-selector">
       <span style="font-size:0.8rem;font-weight:600;color:var(--mut)">สีเว็บ:</span>
-      <div class="theme-dot" style="background:#09090b" onclick="setTheme('black')"></div>
-      <div class="theme-dot" style="background:#3b2e25" onclick="setTheme('brown')"></div>
-      <div class="theme-dot active" style="background:#fff;border:1px solid #ccc" onclick="setTheme('white')"></div>
-      <div class="theme-dot" style="background:#f472b6" onclick="setTheme('pink')"></div>
-      <div class="theme-dot" style="background:#475569" onclick="setTheme('gray')"></div>
+      <div class="theme-dot active" style="background:#3c2a1e" onclick="setTheme('brown')" title="สีน้ำตาล"></div>
+      <div class="theme-dot" style="background:#09090b" onclick="setTheme('black')" title="สีดำ"></div>
+      <div class="theme-dot" style="background:#fff;border:1px solid #ccc" onclick="setTheme('white')" title="สีขาว"></div>
+      <div class="theme-dot" style="background:#f472b6" onclick="setTheme('pink')" title="สีชมพูอ่อน"></div>
+      <div class="theme-dot" style="background:#475569" onclick="setTheme('gray')" title="สีเทา"></div>
     </div>
   </div>
 
   <div class="tabs">
-    <button class="tab-btn" onclick="switchTab('tab2')">🖼️ รวม 2 รูป</button>
-    <button class="tab-btn active" onclick="switchTab('tab4')">📸 รวม 4 รูป</button>
-    <button class="tab-btn" onclick="switchTab('tabPdf')">📄 ทำ PDF</button>
+    <button class="tab-btn" onclick="switchTab('tab2')">🖼️ 2 รูป</button>
+    <button class="tab-btn active" onclick="switchTab('tab4')">📸 4 รูป</button>
+    <button class="tab-btn" onclick="switchTab('tabPdf')">📄 PDF</button>
+    <button class="tab-btn" onclick="switchTab('tabMusic')">☕ สนับสนุน</button>
   </div>
 
   <!-- TAB 4 รูป -->
@@ -134,54 +135,60 @@ canvas{display:block;width:100%;height:auto}
       <button class="btn btn-success" onclick="generatePdf()">📥 ดาวน์โหลดเอกสาร PDF</button>
     </div>
   </div>
-</div>
 
-<!-- ซ่อนจอ YouTube และสร้างมินิเพลเยอร์ลอยตัวมุมล่าง -->
-<div id="ytPlayer" style="position:fixed;bottom:-200px;left:-200px;width:10px;height:10px;opacity:0.01;pointer-events:none;"></div>
-<div class="mini-player">
-  <span style="font-size:.78rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:4px;">🎵 <span id="trackName" style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">เพลงของฉัน</span></span>
-  <button class="player-btn" onclick="ytPrev()" title="เพลงก่อนหน้า">⏮️</button>
-  <button class="player-btn" id="ytPlayBtn" onclick="ytTogglePlay()" style="font-size:1.15rem;" title="เล่น/หยุด">▶️</button>
-  <button class="player-btn" onclick="ytNext()" title="เพลงถัดไป">⏭️</button>
-  <button class="player-btn" id="ytMuteBtn" onclick="ytToggleMute()" title="เปิด/ปิดเสียง">🔊</button>
+  <!-- TAB สนับสนุน (เพลง) -->
+  <div id="tabMusic" class="tab-panel">
+    <div class="card">
+      <div class="card-title">☕ สนับสนุนผู้พัฒนา & ฟังเพลง</div>
+      <p style="font-size:0.85rem;color:var(--mut);margin-bottom:14px;line-height:1.5;">
+        เพลงที่ผมทำเอง ไม่มีลิขสิทธิ์ เปิดฟังเพลินๆ ระหว่างทำงานได้เลยครับ หรือกดเปิดบน YouTube เพื่อช่วยเพิ่มยอดวิวได้โดยตรง ขอบคุณมากๆ ครับ :3
+      </p>
+
+      <!-- ปุ่มเข้า YouTube โดยตรงเพื่อดันยอดวิว -->
+      <a href="https://youtube.com/playlist?list=PLeOakVutFxsWcy-646Osotixb5Gi6y9jD" target="_blank" rel="noopener" class="btn" style="background:#cc0000;color:#fff;margin-bottom:12px;">
+        ▶️ เปิดฟังบนแอป YouTube (ช่วยนับยอดวิวเต็มๆ)
+      </a>
+
+      <!-- ปุ่มสุ่มเพลง -->
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button class="btn" style="flex:1;background:var(--sub);color:var(--text);border:1px solid var(--bdr);" onclick="shuffleMusic()">
+          🔀 สุ่มเพลง (Shuffle)
+        </button>
+        <button class="btn" style="flex:1;background:var(--sub);color:var(--text);border:1px solid var(--bdr);" onclick="nextMusic()">
+          ⏭️ เพลงถัดไป
+        </button>
+      </div>
+
+      <!-- กรอบแสดงวิดีโอ YouTube แบบมาตรฐาน (เห็นจอชัดเจน นับวิวได้) -->
+      <div class="video-wrap">
+        <div id="ytPlayerBox"></div>
+      </div>
+      <p style="font-size:0.75rem;color:var(--mut);text-align:center;">
+        *ดูคลิปบนเว็บแบบเห็นจอภาพระบบ YouTube จะนับยอดวิวให้ตามปกติครับ
+      </p>
+    </div>
+  </div>
 </div>
 
 <script>
-// ----- YouTube Playlist Background Audio -----
-let ytPlayer = null, isYtPlaying = false, isYtMuted = false;
+// ----- YouTube API for Support Tab -----
+let ytSupportPlayer = null;
 function onYouTubeIframeAPIReady(){
-  ytPlayer = new YT.Player('ytPlayer', {
-    height: '10', width: '10',
-    playerVars: { listType: 'playlist', list: 'PLeOakVutFxsWcy-646Osotixb5Gi6y9jD', loop: 1, controls: 0 },
+  ytSupportPlayer = new YT.Player('ytPlayerBox', {
+    playerVars: { listType: 'playlist', list: 'PLeOakVutFxsWcy-646Osotixb5Gi6y9jD', loop: 1 },
     events: {
-      'onReady': (e) => { e.target.setLoop(true); },
-      'onStateChange': (e) => {
-        if(e.data === YT.PlayerState.PLAYING){
-          isYtPlaying = true;
-          document.getElementById('ytPlayBtn').innerText = '⏸️';
-          try {
-            const d = ytPlayer.getVideoData();
-            if(d && d.title) document.getElementById('trackName').innerText = d.title;
-          } catch(err){}
-        } else if(e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED){
-          isYtPlaying = false;
-          document.getElementById('ytPlayBtn').innerText = '▶️';
-        }
-      }
+      'onReady': (e) => { e.target.setLoop(true); }
     }
   });
 }
-function ytTogglePlay(){
-  if(!ytPlayer) return;
-  if(isYtPlaying){ ytPlayer.pauseVideo(); }
-  else { ytPlayer.playVideo(); }
+function shuffleMusic(){
+  if(!ytSupportPlayer) return;
+  ytSupportPlayer.setShuffle(true);
+  ytSupportPlayer.nextVideo();
 }
-function ytNext(){ if(ytPlayer) ytPlayer.nextVideo(); }
-function ytPrev(){ if(ytPlayer) ytPlayer.previousVideo(); }
-function ytToggleMute(){
-  if(!ytPlayer) return;
-  if(isYtMuted){ ytPlayer.unMute(); isYtMuted = false; document.getElementById('ytMuteBtn').innerText = '🔊'; }
-  else { ytPlayer.mute(); isYtMuted = true; document.getElementById('ytMuteBtn').innerText = '🔇'; }
+function nextMusic(){
+  if(!ytSupportPlayer) return;
+  ytSupportPlayer.nextVideo();
 }
 
 // ----- Real-time Clock -----
@@ -247,10 +254,22 @@ async function recordDownload(){
 countVisit();
 loadDownloadCount();
 
-function setTheme(t){document.body.setAttribute('data-theme',t);document.querySelectorAll('.theme-dot').forEach((d,i)=>{d.classList.toggle('active',['black','brown','white','pink','gray'][i]===t)});try{localStorage.setItem('theme',t)}catch(e){}}
-try{const s=localStorage.getItem('theme');if(s)setTheme(s)}catch(e){}
+function setTheme(t){
+  document.body.setAttribute('data-theme',t);
+  document.querySelectorAll('.theme-dot').forEach((d,i)=>{
+    d.classList.toggle('active',['brown','black','white','pink','gray'][i]===t);
+  });
+  try{localStorage.setItem('theme',t)}catch(e){}
+}
+try{const s=localStorage.getItem('theme');if(s)setTheme(s);else setTheme('brown')}catch(e){setTheme('brown')}
 
-function switchTab(id){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');if(id==='tab4')document.querySelectorAll('.tab-btn')[1].classList.add('active');else if(id==='tab2')document.querySelectorAll('.tab-btn')[0].classList.add('active');else document.querySelectorAll('.tab-btn')[2].classList.add('active')}
+function switchTab(id){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const map={'tab2':0,'tab4':1,'tabPdf':2,'tabMusic':3};
+  document.querySelectorAll('.tab-btn')[map[id]].classList.add('active');
+}
 
 function drawCover(ctx,img,x,y,w,h){const a=img.width/img.height,ta=w/h;let sx=0,sy=0,sw=img.width,sh=img.height;if(a>ta){sw=img.height*ta;sx=(img.width-sw)/2}else{sh=img.width/ta;sy=(img.height-sh)/2}ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h)}
 
