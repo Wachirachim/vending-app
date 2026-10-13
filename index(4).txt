@@ -1,0 +1,1054 @@
+﻿<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ระบบจัดการรูปภาพ & รายงานตู้สินค้า</title>
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="รายงานตู้">
+<meta name="theme-color" content="#2b1e16">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%232b1e16'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-size='260'%3E%F0%9F%93%B8%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%232b1e16'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-size='260'%3E%F0%9F%93%B8%3C/text%3E%3C/svg%3E">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A3%E0%B8%B9%E0%B8%9B%E0%B8%A0%E0%B8%B2%E0%B8%9E%20%26%20%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%95%E0%B8%B9%E0%B9%89%22%2C%22short_name%22%3A%22%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%95%E0%B8%B9%E0%B9%89%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231a120b%22%2C%22theme_color%22%3A%22%232b1e16%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%25200%2520512%2520512%27%253E%253Crect%2520width%3D%27512%27%2520height%3D%27512%27%2520rx%3D%27100%27%2520fill%3D%27%25232b1e16%27%2F%253E%253Ctext%2520x%3D%2750%2525%27%2520y%3D%2755%2525%27%2520dominant-baseline%3D%27middle%27%2520text-anchor%3D%27middle%27%2520font-size%3D%27260%27%253E%25F0%259F%2593%25B8%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%20512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://www.youtube.com/iframe_api"></script>
+<style>
+body[data-theme="brown"]{--bg:#1a120b;--card:#2b1e16;--sub:#3c2a1e;--text:#f5ebe0;--mut:#d5bdaf;--bdr:#4e382b;--pri:#d49a55;--pri-h:#ba813e;--in:#221811}
+body[data-theme="white"]{--bg:#f8fafc;--card:#fff;--sub:#f1f5f9;--text:#0f172a;--mut:#64748b;--bdr:#e2e8f0;--pri:#2563eb;--pri-h:#1d4ed8;--in:#fff}
+body[data-theme="black"]{--bg:#09090b;--card:#18181b;--sub:#27272a;--text:#f4f4f5;--mut:#a1a1aa;--bdr:#2e2e33;--pri:#3b82f6;--pri-h:#2563eb;--in:#222226}
+body[data-theme="pink"]{--bg:#fff1f2;--card:#fff;--sub:#ffe4e6;--text:#4c0519;--mut:#9f1239;--bdr:#fecdd3;--pri:#e11d48;--pri-h:#be123c;--in:#fff}
+body[data-theme="gray"]{--bg:#1e293b;--card:#334155;--sub:#475569;--text:#f8fafc;--mut:#cbd5e1;--bdr:#475569;--pri:#38bdf8;--pri-h:#0ea5e9;--in:#243247}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Prompt','Sarabun',sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);padding:14px 14px 50px;line-height:1.5;transition:background .2s,color .2s;min-height:100vh}
+.container{max-width:600px;margin:0 auto}
+.top-bar{display:flex;flex-direction:column;align-items:center;margin-bottom:14px;gap:8px;text-align:center}
+.stats-box{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:8px 14px;width:100%;max-width:420px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.live-clock{font-size:.82rem;font-weight:700;color:var(--pri);margin-bottom:6px}
+.counter-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.counter-badge{background:var(--sub);border:1px solid var(--bdr);border-radius:20px;padding:3px 10px;font-size:.76rem;font-weight:600}
+.counter-num{color:var(--pri);font-weight:700}
+.theme-selector{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--bdr);padding:6px 14px;border-radius:30px}
+.theme-dot{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent}
+.theme-dot.active{border-color:var(--pri);transform:scale(1.15)}
+.tabs{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;background:var(--sub);padding:4px;border-radius:14px;margin-bottom:14px;gap:4px;border:1px solid var(--bdr)}
+.tab-btn{padding:10px 2px;border:none;background:none;border-radius:10px;font-size:.8rem;font-weight:600;color:var(--mut);cursor:pointer;text-align:center}
+.tab-btn.active{background:var(--card);color:var(--pri);box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.card{background:var(--card);border-radius:16px;padding:16px;border:1px solid var(--bdr);box-shadow:0 4px 14px rgba(0,0,0,.04);margin-bottom:14px}
+.card-title{font-size:1rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.form-group{margin-bottom:10px}
+label{display:block;font-size:.82rem;font-weight:600;margin-bottom:4px;color:var(--mut)}
+input[type="text"],input[type="number"],select{width:100%;padding:10px 12px;border:1px solid var(--bdr);background:var(--in);color:var(--text);border-radius:10px;font-size:.95rem;outline:none}
+input:disabled{opacity:0.65;cursor:not-allowed}
+input.input-focused{border-color:var(--pri);box-shadow:0 0 0 2px rgba(212,154,85,0.25)}
+.upload-grid-2,.upload-grid-4{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.upload-box{border:2px dashed var(--bdr);border-radius:12px;padding:12px 6px;text-align:center;background:var(--sub);position:relative;min-height:115px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.upload-box input[type="file"]{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.upload-box .preview-thumb{max-width:100%;max-height:85px;border-radius:6px;margin-top:6px;object-fit:cover;display:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;width:100%;padding:11px;background:var(--pri);color:#fff;border:none;border-radius:12px;font-size:.92rem;font-weight:700;cursor:pointer;gap:6px;text-decoration:none}
+.btn:hover{background:var(--pri-h)}
+.btn-success{background:#16a34a}.btn-batch{background:var(--sub);color:var(--text);border:1px dashed var(--bdr);font-size:.85rem;padding:8px;margin-bottom:12px}
+.result-container{text-align:center;margin-top:14px;display:none}
+.result-canvas-wrap{max-width:100%;background:#fff;border-radius:12px;overflow:hidden;margin:0 auto 12px;border:1px solid var(--bdr);box-shadow:0 4px 16px rgba(0,0,0,.15)}
+canvas{display:block;width:100%;height:auto}
+.video-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;border:1px solid var(--bdr);margin-bottom:12px;background:#000}
+.video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.ctrl-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.palette-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.color-chip{width:32px;height:32px;border-radius:8px;cursor:pointer;border:2px solid var(--bdr)}
+.color-chip.active{border-color:var(--pri);transform:scale(1.1)}
+.filter-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.filter-btn{flex:1 1 calc(33.333% - 6px);min-width:85px;padding:8px 6px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;color:var(--text);font-size:0.78rem;font-weight:700;cursor:pointer;text-align:center}
+.filter-btn.active{background:var(--pri);color:#fff;border-color:var(--pri)}
+.opt-collapse{background:var(--sub);border:1px solid var(--bdr);border-radius:12px;padding:10px 12px;margin-bottom:10px}
+.opt-collapse summary{font-size:0.84rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.opt-collapse summary::-webkit-details-marker{display:none}
+.opt-collapse summary::after{content:'➕';font-size:0.78rem;opacity:.75}
+.opt-collapse[open] summary::after{content:'➖'}
+.opt-content{margin-top:10px}
+.checkerboard-bg{background-color:#fff;background-image:linear-gradient(45deg,#e2e8f0 25%,transparent 25%),linear-gradient(-45deg,#e2e8f0 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e2e8f0 75%),linear-gradient(-45deg,transparent 75%,#e2e8f0 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0}
+.backup-box{display:flex;align-items:flex-start;gap:8px;width:100%;max-width:420px;background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:8px 12px;font-size:.78rem;color:var(--mut);text-align:left;cursor:pointer}
+.backup-box input{margin-top:4px;flex-shrink:0}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--card);color:var(--text);border:1px solid var(--bdr);padding:10px 16px;border-radius:12px;font-size:.85rem;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.3);z-index:10000;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+.secret-btn-wrap{display:flex;justify-content:center;margin-top:24px;padding:10px}
+.secret-cal-btn{background:none;border:none;font-size:1.15rem;cursor:pointer;opacity:0.35;transition:opacity .2s}
+.secret-cal-btn:hover{opacity:.9;transform:scale(1.1)}
+.pin-btn{background:var(--sub);border:1px solid var(--bdr);color:var(--text);font-size:1.25rem;font-weight:700;border-radius:12px;padding:12px 0;cursor:pointer}
+.pin-btn:active{background:var(--pri);color:#fff}
+#calView{display:none}
+.cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.cal-nav-btn{background:var(--sub);color:var(--text);border:1px solid var(--bdr);padding:6px 12px;border-radius:8px;cursor:pointer;font-weight:700}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.cal-day-head{font-size:0.75rem;font-weight:700;color:var(--mut);padding:6px 0}
+.cal-cell{background:var(--sub);border:1px solid var(--bdr);border-radius:8px;padding:6px 2px;min-height:56px;display:flex;flex-direction:column;align-items:center;cursor:pointer}
+.cal-cell.today{border-color:var(--pri);font-weight:800}
+.dots-row{display:flex;gap:3px;margin-top:4px;flex-wrap:wrap;justify-content:center;max-width:32px}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.65);display:none;justify-content:center;align-items:center;z-index:9999;padding:14px}
+.modal-card{background:var(--card);border:1px solid var(--bdr);border-radius:18px;max-width:440px;width:100%;max-height:90vh;overflow-y:auto;padding:18px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.machine-block{background:var(--sub);border:1px solid var(--bdr);border-radius:12px;padding:10px;margin-bottom:10px}
+.round-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.round-row span{font-size:.8rem;min-width:50px;color:var(--mut)}
+.round-row input{padding:7px 10px;font-size:.88rem}
+.name-chip{background:var(--card);border:1px solid var(--bdr);color:var(--text);border-radius:18px;padding:4px 10px;font-size:0.78rem;font-weight:600;cursor:pointer}
+.summary-stat{background:var(--sub);border:1px solid var(--bdr);border-radius:12px;padding:12px;margin-top:14px}
+.summary-stat table{width:100%;border-collapse:collapse;font-size:0.82rem;margin-top:6px}
+.summary-stat th,.summary-stat td{padding:5px 6px;text-align:left;border-bottom:1px solid var(--bdr)}
+</style>
+</head>
+<body data-theme="brown">
+<div class="container" id="mainToolView">
+  <div class="top-bar">
+    <div>
+      <p style="font-size:0.85rem;font-weight:700">จัดทำโดย Wachira Chimraroeng</p>
+      <p style="font-size:0.75rem;color:var(--mut);margin-top:2px">ไว้ใช้ส่วนตัวเพื่อสะดวกต่อการทำงานของตนเองล้วนๆ คนที่ใช้เเล้วชอบก็ขอบคุณครับ :3</p>
+    </div>
+    <div class="stats-box">
+      <div id="liveClock" class="live-clock">⏱️ กำลังโหลดเวลา...</div>
+      <div class="counter-row">
+        <div class="counter-badge">👁️ ผู้เข้าใช้: <span id="visitCount" class="counter-num">...</span> ครั้ง</div>
+        <div class="counter-badge">💾 ดาวน์โหลด: <span id="dlCount" class="counter-num">...</span> ครั้ง</div>
+      </div>
+    </div>
+    <button id="btnInstallPwa" class="btn" style="display:none;width:auto;padding:8px 16px;font-size:0.82rem;border-radius:20px" onclick="installPwa()">📲 ติดตั้งแอปลงมือถือ (เต็มจอ)</button>
+    <label class="backup-box" for="chkBackup">
+      <input type="checkbox" id="chkBackup" checked onchange="saveBackupPref()">
+      <span>☁️ สำรองรูปที่บันทึกไว้ใน Google Drive <small style="display:block;font-size:.72rem;opacity:.85">รูปที่คุณกดบันทึกจะถูกสำรองไว้ ติ๊กออกได้หากไม่ต้องการ</small></span>
+    </label>
+    <div class="theme-selector">
+      <span style="font-size:0.8rem;font-weight:600;color:var(--mut)">สีเว็บ:</span>
+      <div class="theme-dot active" style="background:#3c2a1e" onclick="setTheme('brown')"></div>
+      <div class="theme-dot" style="background:#09090b" onclick="setTheme('black')"></div>
+      <div class="theme-dot" style="background:#fff;border:1px solid #ccc" onclick="setTheme('white')"></div>
+      <div class="theme-dot" style="background:#f472b6" onclick="setTheme('pink')"></div>
+      <div class="theme-dot" style="background:#475569" onclick="setTheme('gray')"></div>
+    </div>
+  </div>
+
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('tab4')">📸 4รูป/หลายรูป</button>
+    <button class="tab-btn" onclick="switchTab('tab2')">🖼️ 2 รูป</button>
+    <button class="tab-btn" onclick="switchTab('tabPdf')">📄 PDF & ตัดรูป</button>
+    <button class="tab-btn" onclick="switchTab('tabMusic')">☕ ฟังเพลง</button>
+  </div>
+
+
+  <!-- TAB 4 รูป & Auto Grid -->
+  <div id="tab4" class="tab-panel active">
+    <div class="card">
+      <div class="card-title">📸 1. รวม 4 รูป (2x2 มาตรฐาน)</div>
+      <label class="btn btn-batch" style="cursor:pointer">⚡ กดที่นี่เพื่อเลือก 4 รูปพร้อมกันทีเดียว
+        <input type="file" accept="image/*" multiple style="display:none" onchange="handleBatch4Upload(event)">
+      </label>
+      <div class="upload-grid-4">
+        <div class="upload-box" id="box4_1"><input type="file" accept="image/*" onchange="handleSingle4Upload(event,0)"><div class="icon">①</div><span style="font-size:.78rem">บนซ้าย</span><img id="thumb4_0" class="preview-thumb"></div>
+        <div class="upload-box" id="box4_2"><input type="file" accept="image/*" onchange="handleSingle4Upload(event,1)"><div class="icon">②</div><span style="font-size:.78rem">บนขวา</span><img id="thumb4_1" class="preview-thumb"></div>
+        <div class="upload-box" id="box4_3"><input type="file" accept="image/*" onchange="handleSingle4Upload(event,2)"><div class="icon">③</div><span style="font-size:.78rem">ล่างซ้าย</span><img id="thumb4_2" class="preview-thumb"></div>
+        <div class="upload-box" id="box4_4"><input type="file" accept="image/*" onchange="handleSingle4Upload(event,3)"><div class="icon">④</div><span style="font-size:.78rem">ล่างขวา</span><img id="thumb4_3" class="preview-thumb"></div>
+      </div>
+
+
+      <details class="opt-collapse"><summary>🎨 เลือกฟิลเตอร์สีรูปภาพ</summary><div class="opt-content"><div class="filter-row" id="filterRow4"></div></div></details>
+      <details class="opt-collapse">
+        <summary>📐 วิธีวางรูป & สัดส่วนภาพรวม</summary>
+        <div class="opt-content">
+          <label>วิธีวางรูป</label>
+          <div class="filter-row" id="fitRow4">
+            <button type="button" class="filter-btn active" onclick="setFit('4','cover',this)">🔍 เต็มช่อง</button>
+            <button type="button" class="filter-btn" onclick="setFit('4','contain',this)">🖼️ ไม่ซูม</button>
+          </div>
+          <label>สัดส่วนภาพรวม</label>
+          <div class="filter-row" id="ratioRow4">
+            <button type="button" class="filter-btn active" onclick="setRatio('4','1:1',this)">1:1 (จัตุรัส)</button>
+            <button type="button" class="filter-btn" onclick="setRatio('4','4:3',this)">4:3 (นอน)</button>
+            <button type="button" class="filter-btn" onclick="setRatio('4','3:4',this)">3:4 (ตั้ง)</button>
+            <button type="button" class="filter-btn" onclick="setRatio('4','16:9',this)">16:9 (กว้าง)</button>
+          </div>
+        </div>
+      </details>
+      <div class="form-group"><label>รหัสสาขา</label><input type="text" id="txt4_code" value="14272"></div>
+      <div class="form-group"><label>ชื่อสาขา</label><input type="text" id="txt4_name" value="บ้านโป่งไผ่"></div>
+      <button class="btn" onclick="generateMerged4Image()">✨ รวมรูปภาพ 4 ช่อง</button>
+    </div>
+    <div class="card result-container" id="resultCard4">
+      <div class="card-title">🎉 ผลลัพธ์รูปภาพ 4 ช่อง</div>
+      <div class="result-canvas-wrap"><canvas id="canvas4"></canvas></div>
+      <button class="btn btn-success" onclick="downloadImage('canvas4','txt4_name','รายงาน_4รูป')">💾 บันทึกรูป (JPG คมชัด/ไฟล์เบา)</button>
+    </div>
+
+
+    <!-- Auto Grid -->
+    <div class="card" style="border:2px dashed var(--pri)">
+      <div class="card-title">🧩 2. รวมรูป Auto Grid (ใส่กี่รูปก็ได้ 1-10+ รูป)</div>
+      <div class="upload-box" style="margin-bottom:12px;min-height:100px">
+        <input type="file" accept="image/*" multiple onchange="handleMultiGridUpload(event)">
+        <div style="font-size:26px">🖼️</div><span style="font-weight:700">แตะเพื่อเลือกรูปภาพหลายรูป</span>
+        <div id="multiCountText" style="color:var(--pri);font-size:.82rem;font-weight:700;margin-top:4px"></div>
+      </div>
+      <label>🎨 สีพื้นหลังรูป</label>
+      <div class="palette-row">
+        <div class="color-chip active" style="background:#fff" onclick="setMultiBg('#ffffff',this)"></div>
+        <div class="color-chip" style="background:#000" onclick="setMultiBg('#000000',this)"></div>
+        <div class="color-chip" style="background:#2b1e16" onclick="setMultiBg('#2b1e16',this)"></div>
+        <div class="color-chip" style="background:#475569" onclick="setMultiBg('#475569',this)"></div>
+        <input type="color" id="pickerMultiBg" value="#ffffff" onchange="setMultiBg(this.value)" style="width:36px;height:34px;border:none;background:none;cursor:pointer">
+        <button type="button" class="btn" style="width:auto;padding:6px 12px;font-size:0.8rem;background:var(--sub);color:var(--text);border:1px solid var(--bdr)" onclick="randomMultiBg()">🎲 สุ่มสี</button>
+      </div>
+      <details class="opt-collapse"><summary>🎨 เลือกฟิลเตอร์สีรูปภาพ</summary><div class="opt-content"><div class="filter-row" id="filterRowMulti"></div></div></details>
+      <details class="opt-collapse">
+        <summary>📐 วิธีวางรูป & สัดส่วนภาพรวม</summary>
+        <div class="opt-content">
+          <label>วิธีวางรูป</label>
+          <div class="filter-row" id="fitRowMulti">
+            <button type="button" class="filter-btn active" onclick="setFit('Multi','cover',this)">🔍 เต็มช่อง</button>
+            <button type="button" class="filter-btn" onclick="setFit('Multi','contain',this)">🖼️ ไม่ซูม</button>
+          </div>
+          <label>สัดส่วนภาพรวม</label>
+          <div class="filter-row" id="ratioRowMulti">
+            <button type="button" class="filter-btn active" onclick="setRatio('Multi','1:1',this)">1:1</button>
+            <button type="button" class="filter-btn" onclick="setRatio('Multi','4:3',this)">4:3</button>
+            <button type="button" class="filter-btn" onclick="setRatio('Multi','3:4',this)">3:4</button>
+            <button type="button" class="filter-btn" onclick="setRatio('Multi','16:9',this)">16:9</button>
+          </div>
+        </div>
+      </details>
+      <div class="form-group">
+        <label>📍 ตำแหน่งข้อความ</label>
+        <select id="selTextPos">
+          <option value="center">ทับตรงกลาง</option>
+          <option value="topbottom">หัว-ท้ายรูป</option>
+          <option value="none">ไม่ใส่ข้อความ</option>
+        </select>
+      </div>
+      <div class="form-group"><label>ข้อความบรรทัด 1</label><input type="text" id="txtMulti_1" placeholder="เช่น 14272 หรือ เติมสินค้า"></div>
+      <div class="form-group"><label>ข้อความบรรทัด 2</label><input type="text" id="txtMulti_2" placeholder="เช่น บ้านโป่งไผ่"></div>
+      <button class="btn" onclick="generateMultiGridImage()">✨ รวมรูปภาพ Auto Grid</button>
+    </div>
+    <div class="card result-container" id="resultCardMulti">
+      <div class="card-title">🎉 ผลลัพธ์รูปภาพ Auto Grid</div>
+      <div class="result-canvas-wrap"><canvas id="canvasMulti"></canvas></div>
+      <button class="btn btn-success" onclick="downloadImage('canvasMulti','txtMulti_2','รายงาน_AutoGrid')">💾 บันทึกรูป (JPG คมชัด/ไฟล์เบา)</button>
+    </div>
+  </div>
+
+
+  <!-- TAB 2 รูป -->
+  <div id="tab2" class="tab-panel">
+    <div class="card">
+      <div class="card-title">1. อัปโหลดรูปภาพก่อน - หลังเติม</div>
+      <div class="upload-grid-2">
+        <div class="upload-box" id="box2_before"><input type="file" accept="image/*" onchange="handleSingle2Upload(event,'before')"><div class="icon">📷</div><span>ก่อนเติม</span><img id="thumb2_before" class="preview-thumb"></div>
+        <div class="upload-box" id="box2_after"><input type="file" accept="image/*" onchange="handleSingle2Upload(event,'after')"><div class="icon">📸</div><span>หลังเติม</span><img id="thumb2_after" class="preview-thumb"></div>
+      </div>
+      <details class="opt-collapse"><summary>🎨 เลือกฟิลเตอร์สีรูปภาพ</summary><div class="opt-content"><div class="filter-row" id="filterRow2"></div></div></details>
+      <details class="opt-collapse">
+        <summary>📐 วิธีวางรูป & สัดส่วนภาพรวม</summary>
+        <div class="opt-content">
+          <label>วิธีวางรูป</label>
+          <div class="filter-row" id="fitRow2">
+            <button type="button" class="filter-btn active" onclick="setFit('2','cover',this)">🔍 เต็มช่อง</button>
+            <button type="button" class="filter-btn" onclick="setFit('2','contain',this)">🖼️ ไม่ซูม</button>
+          </div>
+          <label>สัดส่วนภาพรวม</label>
+          <div class="filter-row" id="ratioRow2">
+            <button type="button" class="filter-btn active" onclick="setRatio('2','1:1',this)">1:1</button>
+            <button type="button" class="filter-btn" onclick="setRatio('2','4:3',this)">4:3</button>
+            <button type="button" class="filter-btn" onclick="setRatio('2','3:4',this)">3:4</button>
+          </div>
+        </div>
+      </details>
+      <div class="form-group"><label>หัวข้อ</label><input type="text" id="txt2_title" value="เติมสินค้า"></div>
+      <div class="form-group"><label>รหัส / ชื่อสาขา</label><input type="text" id="txt2_branch" value="14272 บ้านโป่งไผ่"></div>
+      <div class="form-group"><label>หมายเลขตู้</label><input type="text" id="txt2_version" value="V9"></div>
+      <button class="btn" onclick="generateMerged2Image()">✨ รวมรูปภาพ 2 ช่อง</button>
+    </div>
+    <div class="card result-container" id="resultCard2">
+      <div class="card-title">🎉 ผลลัพธ์รูปภาพ 2 ช่อง</div>
+      <div class="result-canvas-wrap"><canvas id="canvas2"></canvas></div>
+      <button class="btn btn-success" onclick="downloadImage('canvas2','txt2_branch','รายงาน_ตู้')">💾 บันทึกรูป (JPG คมชัด/ไฟล์เบา)</button>
+    </div>
+  </div>
+
+
+  <!-- TAB PDF & ตัดรูป -->
+  <div id="tabPdf" class="tab-panel">
+    <div class="card">
+      <div class="card-title">📄 1. แปลงรูปเป็น PDF</div>
+      <div class="upload-box" style="margin-bottom:12px"><input type="file" accept="image/*" multiple onchange="handlePdfFiles(event)"><div style="font-size:24px">📑</div><span>แตะเพื่อเลือกรูปภาพ</span><div id="pdfCountText" style="color:var(--pri);font-size:.8rem;font-weight:700;margin-top:4px"></div></div>
+      <div class="form-group"><label>ทิศทางหน้ากระดาษ</label><select id="pdfOrientation"><option value="p">แนวตั้ง (Portrait)</option><option value="l">แนวนอน (Landscape)</option></select></div>
+      <button class="btn btn-success" onclick="generatePdf()">📥 ดาวน์โหลดเอกสาร PDF</button>
+    </div>
+
+
+    <div class="card" style="border:2px dashed var(--pri)">
+      <div class="card-title">✂️ 2. ลบพื้นหลังอัตโนมัติ (PNG ใสโปร่งแสง)</div>
+      <p style="font-size:0.82rem;color:var(--mut);margin-bottom:12px">ตัดพื้นหลังออกทันทีด้วยระบบ AI ในเครื่อง ได้ไฟล์ PNG พื้นหลังใสคมชัดสูงสุด</p>
+      <div class="upload-box" id="boxBgRemove" style="margin-bottom:12px">
+        <input type="file" id="bgRemoveFileInput" accept="image/*" onchange="handleBgRemoveFile(event)">
+        <div style="font-size:26px">🪄</div><span style="font-weight:700">แตะเพื่อเลือกรูปภาพ</span>
+        <img id="thumbBgRemove" class="preview-thumb">
+      </div>
+      <button id="btnStartRemoveBg" class="btn" onclick="processRemoveBackground()">✨ เริ่มตัดพื้นหลังอัตโนมัติ (AI)</button>
+      <div id="bgRemoveStatus" style="font-size:0.82rem;font-weight:700;color:var(--pri);margin-top:10px;text-align:center;display:none"></div>
+    </div>
+    <div class="card result-container" id="bgRemovedResultCard">
+      <div class="card-title">🎉 ผลลัพธ์รูปภาพตัดพื้นหลัง (PNG ใส)</div>
+      <div class="result-canvas-wrap checkerboard-bg" style="padding:14px;text-align:center">
+        <img id="bgRemovedPreview" style="max-width:100%;max-height:360px;object-fit:contain">
+      </div>
+      <button class="btn btn-success" onclick="downloadBgRemoved()">💾 ดาวน์โหลด PNG ใส (ความชัดสูงสุด)</button>
+    </div>
+  </div>
+
+
+  <!-- TAB เพลง -->
+  <div id="tabMusic" class="tab-panel">
+    <div class="card">
+      <div class="card-title">☕ สนับสนุนผู้พัฒนา & ฟังเพลง</div>
+      <p style="font-size:0.85rem;color:var(--mut);margin-bottom:14px">เพลงทำเอง ไม่มีลิขสิทธิ์ เปิดฟังเพลินๆ ระหว่างทำงานได้เลยครับ :3</p>
+      <a href="https://youtube.com/playlist?list=PLeOakVutFxsWcy-646Osotixb5Gi6y9jD" target="_blank" rel="noopener" class="btn" style="background:#cc0000;color:#fff;margin-bottom:12px">▶️ เปิดฟังบนแอป YouTube</a>
+      <div class="ctrl-grid">
+        <button class="btn" id="btnPlayPause" style="background:var(--sub);color:var(--text);border:1px solid var(--bdr)" onclick="togglePlayMusic()">▶️ เล่นเพลง</button>
+        <button class="btn" id="btnMuteUnmute" style="background:var(--sub);color:var(--text);border:1px solid var(--bdr)" onclick="toggleMuteMusic()">🔇 ปิดเสียง</button>
+        <button class="btn" style="background:var(--sub);color:var(--text);border:1px solid var(--bdr)" onclick="shuffleMusic()">🔀 สุ่มเพลง</button>
+        <button class="btn" style="background:var(--sub);color:var(--text);border:1px solid var(--bdr)" onclick="nextMusic()">⏭️ เพลงถัดไป</button>
+      </div>
+      <div class="video-wrap">
+        <iframe id="ytPlayerBox" src="https://www.youtube-nocookie.com/embed/videoseries?list=PLeOakVutFxsWcy-646Osotixb5Gi6y9jD&enablejsapi=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="secret-btn-wrap"><button class="secret-cal-btn" onclick="openPinModal()">📅</button></div>
+</div>
+
+
+<!-- PIN & OTP MODAL -->
+<div class="modal-overlay" id="pinModal">
+  <div class="modal-card" style="max-width:320px;text-align:center">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <span style="font-weight:700">🔐 ป้อนรหัสผ่าน</span><button style="background:none;border:none;font-size:1.2rem;color:var(--mut);cursor:pointer" onclick="closePinModal()">✕</button>
+    </div>
+    <div id="pinDisplay" style="letter-spacing:4px;font-size:1.3rem;font-weight:800;background:var(--sub);border:1px solid var(--bdr);border-radius:10px;padding:10px;margin-bottom:14px;color:var(--pri)">------</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+      <button class="pin-btn" onclick="pressPin('1')">1</button><button class="pin-btn" onclick="pressPin('2')">2</button><button class="pin-btn" onclick="pressPin('3')">3</button>
+      <button class="pin-btn" onclick="pressPin('4')">4</button><button class="pin-btn" onclick="pressPin('5')">5</button><button class="pin-btn" onclick="pressPin('6')">6</button>
+      <button class="pin-btn" onclick="pressPin('7')">7</button><button class="pin-btn" onclick="pressPin('8')">8</button><button class="pin-btn" onclick="pressPin('9')">9</button>
+      <button class="pin-btn" onclick="clearPin()" style="font-size:.85rem;color:#ef4444">ล้าง</button><button class="pin-btn" onclick="pressPin('0')">0</button><button class="pin-btn" onclick="backspacePin()">⌫</button>
+    </div>
+    <button class="btn btn-success" style="margin-top:14px" onclick="submitPin()">ตกลง</button>
+  </div>
+</div>
+
+
+<div class="modal-overlay" id="otpModal">
+  <div class="modal-card" style="max-width:340px;text-align:center">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-weight:700">✉️ ยืนยันรหัส OTP</span><button style="background:none;border:none;font-size:1.2rem;color:var(--mut);cursor:pointer" onclick="closeOtpModal()">✕</button></div>
+    <p style="font-size:0.82rem;color:var(--mut);margin-bottom:12px">ระบบได้ส่งรหัส 6 หลักไปยัง Gmail แล้ว</p>
+    <div class="form-group"><input type="text" id="inpOtpCode" maxlength="6" placeholder="OTP 6 หลัก" style="text-align:center;font-size:1.4rem;letter-spacing:6px;font-weight:800"></div>
+    <div id="otpStatusMsg" style="font-size:0.8rem;margin-bottom:10px;min-height:18px"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-success" id="btnVerifyOtp" style="flex:1" onclick="submitVerifyOtp()">ยืนยัน</button>
+      <button class="btn" style="flex:1;background:var(--sub);color:var(--text);border:1px solid var(--bdr)" onclick="requestOtpCode()">ส่งอีกครั้ง</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- CALENDAR VIEW -->
+<div class="container" id="calView">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+    <button class="btn" style="width:auto;padding:8px 14px;background:var(--sub);color:var(--text);border:1px solid var(--bdr)" onclick="exitCalendar()">↩️ กลับหน้าหลัก</button>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button id="btnRequestOtpUnlock" class="btn" style="width:auto;padding:7px 12px;font-size:0.8rem;background:var(--sub);color:var(--pri);border:1px solid var(--pri)" onclick="requestOtpCode()">⚙️ ปลดล็อกแก้ไข (OTP)</button>
+      <span id="calRoleBadge" style="font-size:0.75rem;font-weight:600">-</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="cal-header">
+      <button class="cal-nav-btn" onclick="changeMonth(-1)">◀</button>
+      <div id="calMonthTitle" style="font-weight:700;font-size:1.05rem">-</div>
+      <button class="cal-nav-btn" onclick="changeMonth(1)">▶</button>
+    </div>
+    <div style="display:flex;justify-content:center;gap:14px;margin-bottom:10px;font-size:0.78rem">
+      <span style="display:flex;align-items:center;gap:4px"><span class="dot" style="background:#f97316"></span> ตู้ V8</span>
+      <span style="display:flex;align-items:center;gap:4px"><span class="dot" style="background:#22c55e"></span> ตู้ V9</span>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="summary-stat">
+      <div style="font-weight:700;margin-bottom:6px;display:flex;justify-content:space-between"><span>📊 สรุปประจำเดือน</span><span id="statTotalRounds" style="color:var(--pri)">0 รอบ</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+        <div class="form-group" style="margin-bottom:0"><label style="color:#f97316">ยอดตู้ V8 (บาท)</label><input type="number" id="inpIncomeV8" oninput="renderMonthlyStats()"></div>
+        <div class="form-group" style="margin-bottom:0"><label style="color:#22c55e">ยอดตู้ V9 (บาท)</label><input type="number" id="inpIncomeV9" oninput="renderMonthlyStats()"></div>
+      </div>
+      <div id="peopleSummaryTableWrap"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- DAY MODAL -->
+<div class="modal-overlay" id="dayModal">
+  <div class="modal-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div><span id="modalDateTitle" style="font-weight:800">วันที่ -</span><span id="modalModeBadge" style="font-size:0.75rem;margin-left:6px"></span></div>
+      <button style="background:none;border:none;font-size:1.2rem;color:var(--mut);cursor:pointer" onclick="closeModal()">✕</button>
+    </div>
+    <div id="quickNamesSection" style="margin-bottom:12px;background:var(--sub);border:1px solid var(--bdr);border-radius:12px;padding:8px 10px">
+      <div style="font-size:0.75rem;font-weight:700;color:var(--mut);margin-bottom:6px">⚡ แตะชื่อด่วน:</div>
+      <div id="quickNameChips" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+    </div>
+    <div class="machine-block" style="border-left:4px solid #f97316">
+      <h4 style="color:#f97316;font-size:0.88rem;margin-bottom:6px">🏪 ตู้ V8 (3 รอบ)</h4>
+      <div class="round-row"><span>รอบ 1:</span><input type="text" id="inp_v8_1" onfocus="handleInputFocus(this)"></div>
+      <div class="round-row"><span>รอบ 2:</span><input type="text" id="inp_v8_2" onfocus="handleInputFocus(this)"></div>
+      <div class="round-row"><span>รอบ 3:</span><input type="text" id="inp_v8_3" onfocus="handleInputFocus(this)"></div>
+    </div>
+    <div class="machine-block" style="border-left:4px solid #22c55e">
+      <h4 style="color:#22c55e;font-size:0.88rem;margin-bottom:6px">🏪 ตู้ V9 (3 รอบ)</h4>
+      <div class="round-row"><span>รอบ 1:</span><input type="text" id="inp_v9_1" onfocus="handleInputFocus(this)"></div>
+      <div class="round-row"><span>รอบ 2:</span><input type="text" id="inp_v9_2" onfocus="handleInputFocus(this)"></div>
+      <div class="round-row"><span>รอบ 3:</span><input type="text" id="inp_v9_3" onfocus="handleInputFocus(this)"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn btn-success" id="btnSaveDay" style="flex:1" onclick="saveDayDetails()">💾 บันทึก</button>
+      <button class="btn" style="flex:1;background:var(--sub);color:var(--text);border:1px solid var(--bdr)" onclick="closeModal()">ปิด</button>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxEamU-hoTYBmRQe7uWOD17wAG2SDYkYMfFOZDfSAhpxQ7h17AgzrAOimJ70p02dKRiNA/exec';
+const VIEW_PIN = '14272', EDIT_PIN = 'CHANGE_ME';
+let enteredPin = '', isEditMode = false, currentCalYear = new Date().getFullYear(), currentCalMonth = new Date().getMonth();
+let activeModalKey = null, lastFocusedInput = null, toastTimer = null;
+
+
+const FILTERS = [
+  ['none', 'ปกติ'],
+  ['dark', '🔥 สีเข้ม/คมชัด'],
+  ['bw', '🏁 ขาวดำ'],
+  ['night', '🌙 กู้ภาพมืด'],
+  ['cool', '❄️ สว่างอมฟ้าคลีน'],
+  ['street', '⚡ สตรีทสีสด'],
+  ['vintage', '🎞️ ฟิล์มวินเทจ'],
+  ['hdr', '💥 HDR คมชัด'],
+  ['soft', '✨ ผิวเนียนละมุน']
+];
+
+
+const FILTER_CSS = {
+  dark: 'contrast(135%) saturate(120%) brightness(95%)',
+  bw: 'grayscale(100%) contrast(125%)',
+  night: 'brightness(130%) contrast(110%) saturate(115%)',
+  cool: 'brightness(118%) contrast(102%) saturate(105%)',
+  street: 'contrast(145%) brightness(94%) saturate(145%)',
+  vintage: 'sepia(30%) contrast(95%) brightness(96%) saturate(80%)',
+  hdr: 'contrast(130%) brightness(110%) saturate(110%)',
+  soft: 'brightness(114%) contrast(92%) saturate(108%) sepia(4%)'
+};
+
+
+const optState = {
+  '4': { filter: 'none', fit: 'cover', ratio: '1:1' },
+  'Multi': { filter: 'none', fit: 'cover', ratio: '1:1' },
+  '2': { filter: 'none', fit: 'cover', ratio: '1:1' }
+};
+
+
+function initFilters() {
+  ['4', 'Multi', '2'].forEach(scope => {
+    const el = document.getElementById('filterRow' + scope);
+    if(el) {
+      el.innerHTML = FILTERS.map(([k, name], i) => 
+        `<button type="button" class="filter-btn ${i===0?'active':''}" onclick="setFilter('${scope}','${k}',this)">${name}</button>`
+      ).join('');
+    }
+  });
+}
+initFilters();
+
+
+function setFilter(scope, val, el) {
+  optState[scope].filter = val;
+  el.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b === el));
+  triggerRerender(scope);
+}
+function setFit(scope, val, el) {
+  optState[scope].fit = val;
+  el.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b === el));
+  triggerRerender(scope);
+}
+function setRatio(scope, val, el) {
+  optState[scope].ratio = val;
+  el.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b === el));
+  triggerRerender(scope);
+}
+
+
+function triggerRerender(scope) {
+  if (scope === '4' && images4.filter(Boolean).length === 4) generateMerged4Image();
+  else if (scope === 'Multi' && multiImages.length) generateMultiGridImage();
+  else if (scope === '2' && img2_b && img2_a) generateMerged2Image();
+}
+
+
+function getFilterCss(t) { return FILTER_CSS[t] || 'none'; }
+function getCanvasDims(ratio) {
+  if (ratio === '4:3') return [1200, 900];
+  if (ratio === '3:4') return [900, 1200];
+  if (ratio === '16:9') return [1600, 900];
+  return [1200, 1200];
+}
+
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+
+function isBackupOn() { try { return localStorage.getItem('backup_to_drive') !== 'off'; } catch(e){ return true; } }
+function saveBackupPref() { try { localStorage.setItem('backup_to_drive', document.getElementById('chkBackup').checked ? 'on' : 'off'); } catch(e){} }
+document.getElementById('chkBackup').checked = isBackupOn();
+
+
+function loadImageFile(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('โหลดรูปไม่ได้: ' + file.name)); };
+    img.src = url;
+  });
+}
+function releaseImage(img) { try { if(img?.src?.startsWith('blob:')) URL.revokeObjectURL(img.src); } catch(e){} }
+
+
+async function ensureFonts() {
+  try { if (document.fonts?.load) await document.fonts.load('700 50px "Prompt"'); } catch(e){}
+}
+
+
+function drawCover(ctx,img,x,y,w,h){
+  const a=img.width/img.height,ta=w/h;let sx=0,sy=0,sw=img.width,sh=img.height;
+  if(a>ta){sw=img.height*ta;sx=(img.width-sw)/2;}else{sh=img.width/ta;sy=(img.height-sh)/2;}
+  ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h);
+}
+function drawContain(ctx,img,x,y,w,h){
+  const a=img.width/img.height,ta=w/h;let dw=w,dh=h,dx=x,dy=y;
+  if(a>ta){dh=w/a;dy=y+(h-dh)/2;}else{dw=h*a;dx=x+(w-dw)/2;}
+  ctx.drawImage(img,dx,dy,dw,dh);
+}
+function drawImageFit(ctx,img,x,y,w,h,mode){ (mode === 'contain' ? drawContain : drawCover)(ctx,img,x,y,w,h); }
+
+
+// ----- 4 รูป -----
+const images4 = [null,null,null,null];
+function handleBatch4Upload(e){ Array.from(e.target.files).slice(0,4).forEach((f,i)=>loadSlot4(f,i)); }
+function handleSingle4Upload(e,i){ if(e.target.files[0]) loadSlot4(e.target.files[0],i); }
+async function loadSlot4(file,i){
+  try {
+    const img = await loadImageFile(file);
+    releaseImage(images4[i]); images4[i] = img;
+    const t = document.getElementById(`thumb4_${i}`); t.src = img.src; t.style.display = 'block';
+    document.getElementById(`box4_${i+1}`).querySelector('.icon').style.display = 'none';
+  } catch(err){ alert(err.message); }
+}
+
+
+async function generateMerged4Image(){
+  if(images4.filter(Boolean).length < 4) return alert('กรุณาเลือกรูปให้ครบ 4 รูป');
+  await ensureFonts();
+  const [cW, cH] = getCanvasDims(optState['4'].ratio);
+  const c = document.getElementById('canvas4'), ctx = c.getContext('2d');
+  c.width = cW; c.height = cH; ctx.fillStyle = '#fff'; ctx.fillRect(0,0,cW,cH);
+  const m = 14, g = 14, w = (cW - m*2 - g)/2, h = (cH - m*2 - g)/2;
+  const pos = [{x:m,y:m},{x:m+w+g,y:m},{x:m,y:m+h+g},{x:m+w+g,y:m+h+g}];
+  const filt = getFilterCss(optState['4'].filter);
+  for(let i=0;i<4;i++){
+    ctx.save();
+    if(filt !== 'none') ctx.filter = filt;
+    drawImageFit(ctx, images4[i], pos[i].x, pos[i].y, w, h, optState['4'].fit);
+    ctx.restore();
+  }
+  drawTextOverlay(ctx, cW, cH, document.getElementById('txt4_code').value.trim(), document.getElementById('txt4_name').value.trim(), 'center');
+  document.getElementById('resultCard4').style.display = 'block';
+  document.getElementById('resultCard4').scrollIntoView({behavior:'smooth'});
+}
+
+
+// ----- Auto Grid -----
+let multiImages = [], multiLoading = false, currentMultiBg = '#ffffff';
+function setMultiBg(c, el){
+  currentMultiBg = c;
+  document.getElementById('pickerMultiBg').value = c.length === 7 ? c : '#ffffff';
+  document.querySelectorAll('.color-chip').forEach(x => x.classList.remove('active'));
+  if(el) el.classList.add('active');
+}
+function randomMultiBg(){ setMultiBg('#' + Math.floor(Math.random()*16777215).toString(16).padStart(6,'0')); }
+
+
+async function handleMultiGridUpload(e){
+  const files = Array.from(e.target.files);
+  if(!files.length) return;
+  multiLoading = true;
+  document.getElementById('multiCountText').innerText = `กำลังโหลด ${files.length} รูป...`;
+  try {
+    const loaded = await Promise.all(files.map(loadImageFile));
+    multiImages.forEach(releaseImage); multiImages = loaded;
+    document.getElementById('multiCountText').innerText = `เลือกแล้ว ${loaded.length} รูป`;
+  } catch(err){ alert(err.message); }
+  finally { multiLoading = false; }
+}
+
+
+async function generateMultiGridImage(){
+  if(multiLoading || !multiImages.length) return alert('กรุณาเลือกรูปภาพอย่างน้อย 1 รูป');
+  await ensureFonts();
+  const N = multiImages.length, [cW, cH] = getCanvasDims(optState['Multi'].ratio);
+  const c = document.getElementById('canvasMulti'), ctx = c.getContext('2d');
+  c.width = cW; c.height = cH; ctx.fillStyle = currentMultiBg; ctx.fillRect(0,0,cW,cH);
+
+
+  let cols = 1, rows = 1;
+  if(N === 2) { cols = (optState['Multi'].ratio === '3:4') ? 1 : 2; rows = (optState['Multi'].ratio === '3:4') ? 2 : 1; }
+  else if(N <= 4) { cols = 2; rows = 2; }
+  else if(N <= 6) { cols = 3; rows = 2; }
+  else if(N <= 9) { cols = 3; rows = 3; }
+  else if(N > 9) { cols = Math.ceil(Math.sqrt(N)); rows = Math.ceil(N / cols); }
+
+
+  const m = 14, g = 10, cellW = (cW - m*2 - g*(cols-1)) / cols, cellH = (cH - m*2 - g*(rows-1)) / rows;
+  const filt = getFilterCss(optState['Multi'].filter);
+  for(let i=0; i<N; i++){
+    const x = m + (i % cols) * (cellW + g), y = m + Math.floor(i / cols) * (cellH + g);
+    ctx.save();
+    if(filt !== 'none') ctx.filter = filt;
+    drawImageFit(ctx, multiImages[i], x, y, cellW, cellH, optState['Multi'].fit);
+    ctx.restore();
+  }
+  drawTextOverlay(ctx, cW, cH, document.getElementById('txtMulti_1').value.trim(), document.getElementById('txtMulti_2').value.trim(), document.getElementById('selTextPos').value);
+  document.getElementById('resultCardMulti').style.display = 'block';
+  document.getElementById('resultCardMulti').scrollIntoView({behavior:'smooth'});
+}
+
+
+function drawTextOverlay(ctx, cW, cH, t1, t2, pos){
+  if(pos === 'none' || (!t1 && !t2)) return;
+  ctx.save();
+  ctx.textAlign = 'center'; ctx.lineWidth = 14; ctx.lineJoin = 'round'; ctx.strokeStyle = '#000'; ctx.fillStyle = '#fff';
+  const scale = Math.min(cW, cH) / 1200, f1 = Math.round(74*scale), f2 = Math.round(70*scale), gap = Math.round(46*scale);
+  if(pos === 'center'){
+    ctx.textBaseline = 'middle';
+    if(t1 && t2){
+      ctx.font = `bold ${f1}px "Prompt"`; ctx.strokeText(t1, cW/2, cH/2 - gap); ctx.fillText(t1, cW/2, cH/2 - gap);
+      ctx.font = `bold ${f2}px "Prompt"`; ctx.strokeText(t2, cW/2, cH/2 + gap); ctx.fillText(t2, cW/2, cH/2 + gap);
+    } else {
+      const s = t1 || t2; ctx.font = `bold ${f1}px "Prompt"`; ctx.strokeText(s, cW/2, cH/2); ctx.fillText(s, cW/2, cH/2);
+    }
+  } else if(pos === 'topbottom'){
+    const fTop = Math.round(64*scale);
+    ctx.font = `bold ${fTop}px "Prompt"`;
+    if(t1){ ctx.textBaseline = 'top'; ctx.strokeText(t1, cW/2, 35*scale); ctx.fillText(t1, cW/2, 35*scale); }
+    if(t2){ ctx.textBaseline = 'bottom'; ctx.strokeText(t2, cW/2, cH - 35*scale); ctx.fillText(t2, cW/2, cH - 35*scale); }
+  }
+  ctx.restore();
+}
+
+
+// ----- 2 รูป -----
+let img2_b = null, img2_a = null;
+async function handleSingle2Upload(e,t){
+  if(!e.target.files[0]) return;
+  try {
+    const img = await loadImageFile(e.target.files[0]);
+    if(t === 'before'){ releaseImage(img2_b); img2_b = img; } else { releaseImage(img2_a); img2_a = img; }
+    const th = document.getElementById('thumb2_' + t); th.src = img.src; th.style.display = 'block';
+    document.getElementById('box2_' + t).querySelector('.icon').style.display = 'none';
+  } catch(err){ alert(err.message); }
+}
+
+
+async function generateMerged2Image(){
+  if(!img2_b || !img2_a) return alert('กรุณาเลือกรูปให้ครบทั้งก่อนและหลังเติม');
+  await ensureFonts();
+  const [cW, cH] = getCanvasDims(optState['2'].ratio), c = document.getElementById('canvas2'), ctx = c.getContext('2d');
+  c.width = cW; c.height = cH; ctx.fillStyle = '#fff'; ctx.fillRect(0,0,cW,cH);
+  const scale = cH / 1200;
+  ctx.textAlign = 'center'; ctx.fillStyle = '#000';
+  ctx.font = `bold ${Math.round(50*scale)}px "Prompt"`; ctx.fillText(document.getElementById('txt2_title').value||'เติมสินค้า', cW/2, 85*scale);
+  ctx.font = `bold ${Math.round(52*scale)}px "Prompt"`; ctx.fillText(document.getElementById('txt2_branch').value||'', cW/2, 145*scale);
+  ctx.font = `bold ${Math.round(48*scale)}px "Prompt"`; ctx.fillText(document.getElementById('txt2_version').value||'', cW/2, 205*scale);
+  const py = 230*scale, ph = cH - py - 120*scale, px = 16, pw = (cW - 32 - 12) / 2;
+  const filt = getFilterCss(optState['2'].filter);
+  ctx.save();
+  if(filt !== 'none') ctx.filter = filt;
+  drawImageFit(ctx, img2_b, px, py, pw, ph, optState['2'].fit);
+  drawImageFit(ctx, img2_a, px+pw+12, py, pw, ph, optState['2'].fit);
+  ctx.restore();
+  ctx.font = `bold ${Math.round(56*scale)}px "Prompt"`;
+  ctx.fillText('ก่อนเติม', px + pw/2, cH - 40*scale); ctx.fillText('หลังเติม', px+pw+12 + pw/2, cH - 40*scale);
+  document.getElementById('resultCard2').style.display = 'block';
+  document.getElementById('resultCard2').scrollIntoView({behavior:'smooth'});
+}
+
+
+// ----- ดาวน์โหลด + สำรอง Drive -----
+async function backupToDrive(canvas, folderName, fileName){
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ folderName, fileName, image: canvas.toDataURL('image/jpeg', 0.85) })
+    });
+    const d = await res.json();
+    if(d?.status === 'success') showToast('☁️ สำรองรูปลง Drive แล้ว');
+  } catch(e){}
+}
+
+
+function downloadImage(cid, iid, def){
+  recordDownload();
+  const c = document.getElementById(cid);
+  const v = (document.getElementById(iid)?.value || def).replace(/[^a-zA-Z0-9ก-๙]/g, '_');
+  const a = document.createElement('a');
+  a.download = `${def}_${v}.jpg`;
+  a.href = c.toDataURL('image/jpeg', 0.90);
+  a.click();
+  if(!isBackupOn()) return;
+  const now = new Date();
+  const d = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const t = `${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}`;
+  backupToDrive(c, (def === 'รายงาน_ตู้' ? 'Vending_เติมตู้' : 'Vending_รูปทั่วไป'), `${d}_${t}_${v}_${Math.random().toString(36).slice(2,6)}.jpg`);
+}
+
+
+// ----- PDF & AI ลบพื้นหลัง -----
+let pdfImgs = [], pdfLoading = false;
+async function handlePdfFiles(e){
+  const files = Array.from(e.target.files);
+  if(!files.length) return;
+  pdfLoading = true;
+  document.getElementById('pdfCountText').innerText = `กำลังโหลด ${files.length} รูป...`;
+  try {
+    const loaded = await Promise.all(files.map(loadImageFile));
+    pdfImgs.forEach(releaseImage); pdfImgs = loaded;
+    document.getElementById('pdfCountText').innerText = `เลือกแล้ว ${loaded.length} รูป`;
+  } catch(err){ alert(err.message); }
+  finally { pdfLoading = false; }
+}
+
+
+function generatePdf(){
+  if(pdfLoading || !pdfImgs.length) return alert('กรุณาเลือกรูปภาพก่อนครับ');
+  recordDownload();
+  const doc = new jspdf.jsPDF({ orientation: document.getElementById('pdfOrientation').value, unit: 'mm', format: 'a4' });
+  const pw = doc.internal.pageSize.getWidth(), ph = doc.internal.pageSize.getHeight(), mw = pw-20, mh = ph-20;
+  pdfImgs.forEach((img, idx) => {
+    if(idx > 0) doc.addPage();
+    let w = mw, h = mw / (img.width/img.height);
+    if(h > mh){ h = mh; w = mh * (img.width/img.height); }
+    const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+    c.getContext('2d').drawImage(img,0,0);
+    doc.addImage(c.toDataURL('image/jpeg', 0.92), 'JPEG', (pw-w)/2, (ph-h)/2, w, h);
+  });
+  doc.save('เอกสาร.pdf');
+}
+
+
+let bgRemoveFile = null, lastBgRemovedBlobUrl = null, removeBgFn = null;
+function handleBgRemoveFile(e){
+  if(!e.target.files[0]) return;
+  bgRemoveFile = e.target.files[0];
+  const th = document.getElementById('thumbBgRemove'); th.src = URL.createObjectURL(bgRemoveFile); th.style.display = 'block';
+  document.getElementById('boxBgRemove').querySelector('span').innerText = bgRemoveFile.name;
+}
+
+
+async function processRemoveBackground(){
+  if(!bgRemoveFile) return alert('กรุณาเลือกรูปภาพก่อนครับ');
+  const st = document.getElementById('bgRemoveStatus'), btn = document.getElementById('btnStartRemoveBg');
+  btn.disabled = true; st.style.display = 'block'; st.innerText = '⏳ กำลังประมวลผล AI ตัดพื้นหลัง...';
+  try {
+    if(!removeBgFn){
+      const mod = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.7/+esm');
+      removeBgFn = mod.removeBackground;
+    }
+    const blob = await removeBgFn(bgRemoveFile, {
+      progress: (k, cur, tot) => { if(tot>0) st.innerText = `⏳ กำลังตัดพื้นหลัง... (${Math.round((cur/tot)*100)}%)`; }
+    });
+    if(lastBgRemovedBlobUrl) URL.revokeObjectURL(lastBgRemovedBlobUrl);
+    lastBgRemovedBlobUrl = URL.createObjectURL(blob);
+    document.getElementById('bgRemovedPreview').src = lastBgRemovedBlobUrl;
+    document.getElementById('bgRemovedResultCard').style.display = 'block';
+    st.innerText = '✅ ตัดพื้นหลังสำเร็จ!';
+    document.getElementById('bgRemovedResultCard').scrollIntoView({behavior:'smooth'});
+  } catch(e){ st.innerText = '⚠️ เกิดข้อผิดพลาด: ' + (e.message || 'เชื่อมต่อเน็ตแล้วลองใหม่'); }
+  finally { btn.disabled = false; }
+}
+
+
+function downloadBgRemoved(){
+  if(!lastBgRemovedBlobUrl) return;
+  recordDownload();
+  const a = document.createElement('a'); a.download = `ตัดพื้นหลัง_${Date.now()}.png`; a.href = lastBgRemovedBlobUrl; a.click();
+}
+
+
+// ----- PWA Prompt -----
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); deferredPrompt = e;
+  document.getElementById('btnInstallPwa').style.display = 'inline-flex';
+});
+function installPwa(){
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => { deferredPrompt = null; document.getElementById('btnInstallPwa').style.display = 'none'; });
+  } else alert('💡 วิธีติดตั้ง: แตะจุดสามจุด (⋮) ของ Chrome แล้วเลือก "ติดตั้งแอป" หรือ "เพิ่มลงในหน้าจอหลัก"');
+}
+
+
+// ----- ปฏิทิน & PIN & OTP -----
+function openPinModal(){ enteredPin = ''; updatePinDisplay(); document.getElementById('pinModal').style.display = 'flex'; }
+function closePinModal(){ document.getElementById('pinModal').style.display = 'none'; }
+function pressPin(d){ if(enteredPin.length < 16){ enteredPin += d; updatePinDisplay(); } }
+function backspacePin(){ enteredPin = enteredPin.slice(0,-1); updatePinDisplay(); }
+function clearPin(){ enteredPin = ''; updatePinDisplay(); }
+function updatePinDisplay(){ document.getElementById('pinDisplay').innerText = enteredPin ? '•'.repeat(enteredPin.length) : '------'; }
+
+
+async function submitPin(){
+  if(!enteredPin) return;
+  try {
+    const res = await fetch(`${GAS_URL}?action=verify_pin&pin=${encodeURIComponent(enteredPin)}`);
+    const d = await res.json();
+    if(d?.status === 'success'){ isEditMode = (d.role === 'edit'); closePinModal(); enterCalendarView(); return; }
+  } catch(e){}
+  if(enteredPin === VIEW_PIN){ isEditMode = false; closePinModal(); enterCalendarView(); }
+  else if(/^\d{4,16}$/.test(EDIT_PIN) && enteredPin === EDIT_PIN){ isEditMode = true; closePinModal(); enterCalendarView(); }
+  else { alert('รหัสผ่านไม่ถูกต้อง'); clearPin(); }
+}
+
+
+async function requestOtpCode(){
+  const msg = document.getElementById('otpStatusMsg');
+  document.getElementById('otpModal').style.display = 'flex';
+  msg.innerHTML = '<span style="color:var(--pri)">กำลังส่งรหัส OTP เข้า Gmail...</span>';
+  try {
+    const res = await fetch(`${GAS_URL}?action=request_otp`);
+    const d = await res.json();
+    msg.innerHTML = d?.status === 'sent' ? '<span style="color:#22c55e">ส่ง OTP เรียบร้อยแล้ว (5 นาที)</span>' : '<span style="color:#ef4444">ส่งรหัสไม่สำเร็จ</span>';
+  } catch(e){ msg.innerHTML = '<span style="color:#ef4444">การเชื่อมต่อขัดข้อง</span>'; }
+}
+async function submitVerifyOtp(){
+  const otp = document.getElementById('inpOtpCode').value.trim();
+  if(otp.length !== 6) return alert('กรอก OTP ให้ครบ 6 หลัก');
+  try {
+    const res = await fetch(`${GAS_URL}?action=verify_otp&otp=${encodeURIComponent(otp)}`);
+    const d = await res.json();
+    if(d?.status === 'success'){ isEditMode = true; closeOtpModal(); alert('🎉 ปลดล็อกโหมดแก้ไขเรียบร้อย'); updateRoleStatus(); renderCalendar(); }
+    else alert('OTP ไม่ถูกต้องหรือหมดอายุ');
+  } catch(e){ alert('การเชื่อมต่อขัดข้อง'); }
+}
+function closeOtpModal(){ document.getElementById('otpModal').style.display = 'none'; document.getElementById('inpOtpCode').value = ''; }
+
+
+function enterCalendarView(){
+  document.getElementById('mainToolView').style.display = 'none'; document.getElementById('calView').style.display = 'block';
+  updateRoleStatus(); renderCalendar(); fetchScheduleFromSheet();
+}
+function exitCalendar(){ document.getElementById('calView').style.display = 'none'; document.getElementById('mainToolView').style.display = 'block'; }
+function updateRoleStatus(){
+  const b = document.getElementById('calRoleBadge'), u = document.getElementById('btnRequestOtpUnlock');
+  b.innerText = isEditMode ? '✏️ โหมดแก้ไข' : '👁️ โหมดดูอย่างเดียว'; b.style.color = isEditMode ? '#22c55e' : 'var(--pri)';
+  u.style.display = isEditMode ? 'none' : 'inline-flex';
+}
+
+
+function getStoredSchedule(){ try { return JSON.parse(localStorage.getItem('vending_schedule_data')||'{}'); } catch(e){ return {}; } }
+function setStoredSchedule(d){ try { localStorage.setItem('vending_schedule_data', JSON.stringify(d)); } catch(e){} }
+async function fetchScheduleFromSheet(){
+  try {
+    const res = await fetch(`${GAS_URL}?action=get_schedule`);
+    const d = await res.json();
+    if(d?.status === 'success'){
+      if(d.data) setStoredSchedule(d.data);
+      if(d.names) localStorage.setItem('vending_recent_names', JSON.stringify(d.names));
+      renderCalendar();
+    }
+  } catch(e){}
+}
+
+
+const thaiMonths = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const thaiDays = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+function changeMonth(d){ currentCalMonth += d; if(currentCalMonth<0){currentCalMonth=11;currentCalYear--;}else if(currentCalMonth>11){currentCalMonth=0;currentCalYear++;} renderCalendar(); }
+
+
+function renderCalendar(){
+  document.getElementById('calMonthTitle').innerText = `${thaiMonths[currentCalMonth]} ${currentCalYear + 543}`;
+  const grid = document.getElementById('calGrid'); grid.innerHTML = '';
+  thaiDays.forEach(d => { const el = document.createElement('div'); el.className = 'cal-day-head'; el.innerText = d; grid.appendChild(el); });
+
+
+  const firstDay = new Date(currentCalYear, currentCalMonth, 1).getDay();
+  const totalDays = new Date(currentCalYear, currentCalMonth + 1, 0).getDate();
+  const today = new Date(), sched = getStoredSchedule();
+
+
+  for(let i=0; i<firstDay; i++){ const e = document.createElement('div'); e.className = 'cal-cell'; e.style.opacity = '0'; grid.appendChild(e); }
+  for(let day=1; day<=totalDays; day++){
+    const key = `${currentCalYear}-${String(currentCalMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const dData = sched[key] || { v8:[], v9:[] };
+    const c8 = (dData.v8||[]).filter(Boolean).length, c9 = (dData.v9||[]).filter(Boolean).length;
+    const cell = document.createElement('div'); cell.className = 'cal-cell';
+    if(today.getFullYear()===currentCalYear && today.getMonth()===currentCalMonth && today.getDate()===day) cell.classList.add('today');
+    cell.innerHTML = `<span style="font-size:0.85rem;font-weight:700">${day}</span>`;
+    if(c8 || c9){
+      const dots = document.createElement('div'); dots.className = 'dots-row';
+      for(let k=0;k<c8;k++) dots.innerHTML += '<span class="dot" style="background:#f97316"></span>';
+      for(let k=0;k<c9;k++) dots.innerHTML += '<span class="dot" style="background:#22c55e"></span>';
+      cell.appendChild(dots);
+    }
+    cell.onclick = () => openDayModal(key, day);
+    grid.appendChild(cell);
+  }
+  renderMonthlyStats();
+}
+
+
+function openDayModal(key, day){
+  activeModalKey = key; lastFocusedInput = null;
+  document.getElementById('modalDateTitle').innerText = `📅 วันที่ ${day} ${thaiMonths[currentCalMonth]} ${currentCalYear + 543}`;
+  document.getElementById('modalModeBadge').innerText = isEditMode ? '(แก้ไขได้)' : '(ดูอย่างเดียว)';
+  document.getElementById('modalModeBadge').style.color = isEditMode ? '#22c55e' : 'var(--mut)';
+  const data = getStoredSchedule()[key] || { v8:[], v9:[] };
+  ['inp_v8_1','inp_v8_2','inp_v8_3','inp_v9_1','inp_v9_2','inp_v9_3'].forEach((id, idx) => {
+    const el = document.getElementById(id);
+    el.value = (idx < 3 ? data.v8?.[idx] : data.v9?.[idx-3]) || '';
+    el.disabled = !isEditMode; el.classList.remove('input-focused');
+  });
+  renderQuickNames();
+  document.getElementById('btnSaveDay').style.display = isEditMode ? 'block' : 'none';
+  document.getElementById('dayModal').style.display = 'flex';
+}
+function closeModal(){ document.getElementById('dayModal').style.display = 'none'; }
+function handleInputFocus(el){ document.querySelectorAll('.round-row input').forEach(i=>i.classList.remove('input-focused')); lastFocusedInput = el; el.classList.add('input-focused'); }
+
+
+function renderQuickNames(){
+  const wrap = document.getElementById('quickNameChips'), sec = document.getElementById('quickNamesSection');
+  let names = []; try { names = JSON.parse(localStorage.getItem('vending_recent_names')||'[]'); } catch(e){}
+  if(!names.length || !isEditMode){ sec.style.display = 'none'; return; }
+  sec.style.display = 'block'; wrap.innerHTML = '';
+  names.forEach(n => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'name-chip'; b.innerText = n;
+    b.onclick = () => { if(lastFocusedInput) lastFocusedInput.value = n; };
+    wrap.appendChild(b);
+  });
+}
+
+
+function saveDayDetails(){
+  if(!isEditMode || !activeModalKey) return;
+  const sched = getStoredSchedule();
+  const v8 = [document.getElementById('inp_v8_1').value.trim(), document.getElementById('inp_v8_2').value.trim(), document.getElementById('inp_v8_3').value.trim()];
+  const v9 = [document.getElementById('inp_v9_1').value.trim(), document.getElementById('inp_v9_2').value.trim(), document.getElementById('inp_v9_3').value.trim()];
+  if(v8.some(Boolean) || v9.some(Boolean)) sched[activeModalKey] = { v8, v9 }; else delete sched[activeModalKey];
+  setStoredSchedule(sched); closeModal(); renderCalendar();
+  fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'save_day', date: activeModalKey, v8, v9 }) })
+    .then(() => showToast('☁️ ซิงก์ลง Google Sheets แล้ว')).catch(() => showToast('⚠️ ซิงก์ Sheets ไม่สำเร็จ'));
+}
+
+
+function renderMonthlyStats(){
+  const sched = getStoredSchedule(), pfx = `${currentCalYear}-${String(currentCalMonth+1).padStart(2,'0')}`;
+  let t8 = 0, t9 = 0, p8 = {}, p9 = {}, set = new Set();
+  Object.keys(sched).forEach(k => {
+    if(k.startsWith(pfx)){
+      (sched[k].v8||[]).filter(Boolean).forEach(n => { t8++; p8[n] = (p8[n]||0)+1; set.add(n); });
+      (sched[k].v9||[]).filter(Boolean).forEach(n => { t9++; p9[n] = (p9[n]||0)+1; set.add(n); });
+    }
+  });
+  document.getElementById('statTotalRounds').innerText = `รวม ${t8+t9} รอบ (V8: ${t8} | V9: ${t9})`;
+  const inc8 = parseFloat(document.getElementById('inpIncomeV8').value)||0, inc9 = parseFloat(document.getElementById('inpIncomeV9').value)||0;
+  const wrap = document.getElementById('peopleSummaryTableWrap');
+  if(!set.size){ wrap.innerHTML = '<p style="font-size:0.8rem;color:var(--mut);text-align:center;margin-top:6px">ยังไม่มีข้อมูล</p>'; return; }
+  const list = Array.from(set).map(n => {
+    const c8 = p8[n]||0, c9 = p9[n]||0, sum = (t8>0?(c8/t8)*inc8:0) + (t9>0?(c9/t9)*inc9:0);
+    return { n, c8, c9, tot: c8+c9, sum };
+  }).sort((a,b) => b.sum - a.sum || b.tot - a.tot);
+
+
+  wrap.innerHTML = `<table><thead><tr><th>ผู้เติม</th><th>V8</th><th>V9</th><th>รวม</th><th>ยอดเงิน</th></tr></thead><tbody>` +
+    list.map(x => `<tr><td><strong>${x.n}</strong></td><td style="color:#f97316">${x.c8}</td><td style="color:#22c55e">${x.c9}</td><td>${x.tot}</td><td style="color:var(--pri);font-weight:700">${(inc8||inc9)?x.sum.toLocaleString(undefined,{maximumFractionDigits:0})+' บ.':'-'}</td></tr>`).join('') + `</tbody></table>`;
+}
+
+
+// ----- YouTube & System -----
+let ytPlayer = null, isPlaying = false;
+function onYouTubeIframeAPIReady(){
+  ytPlayer = new YT.Player('ytPlayerBox', {
+    events: {
+      'onStateChange': e => {
+        const b = document.getElementById('btnPlayPause');
+        isPlaying = (e.data === YT.PlayerState.PLAYING);
+        b.innerHTML = isPlaying ? '⏸️ หยุดเพลง' : '▶️ เล่นเพลง';
+      }
+    }
+  });
+}
+function togglePlayMusic(){ if(ytPlayer){ isPlaying ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); } }
+function toggleMuteMusic(){ if(ytPlayer){ const m = ytPlayer.isMuted(); m ? ytPlayer.unMute() : ytPlayer.mute(); document.getElementById('btnMuteUnmute').innerHTML = m ? '🔇 ปิดเสียง' : '🔊 เปิดเสียง'; } }
+function shuffleMusic(){ if(ytPlayer){ ytPlayer.setShuffle(true); ytPlayer.nextVideo(); } }
+function nextMusic(){ if(ytPlayer) ytPlayer.nextVideo(); }
+
+
+function updateClock(){
+  const now = new Date(), days = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'], m = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const t = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  document.getElementById('liveClock').innerText = `🕒 วัน${days[now.getDay()]}ที่ ${now.getDate()} ${m[now.getMonth()]} ${now.getFullYear()+543} เวลา ${t} น.`;
+}
+setInterval(updateClock, 1000); updateClock();
+
+
+async function callCounter(kind, key, elId){
+  for(const u of [`https://abacus.jasoncameron.dev/${kind}/vending_wachira_2026/${key}`, `https://countapi.mileshilliard.com/api/v1/${kind}/vending_wachira_2026_${key}`]){
+    try {
+      const r = await fetch(u), d = await r.json();
+      if(d?.value !== undefined){ document.getElementById(elId).innerText = Number(d.value).toLocaleString(); return; }
+    } catch(e){}
+  }
+}
+function countVisit(){ callCounter('hit','visits','visitCount'); }
+function loadDownloadCount(){ callCounter('get','downloads','dlCount'); }
+function recordDownload(){ callCounter('hit','downloads','dlCount'); }
+countVisit(); loadDownloadCount(); fetchScheduleFromSheet();
+
+
+function setTheme(t){
+  document.body.setAttribute('data-theme', t);
+  document.querySelectorAll('.theme-dot').forEach((d,i) => d.classList.toggle('active', ['brown','black','white','pink','gray'][i] === t));
+  try { localStorage.setItem('theme', t); } catch(e){}
+}
+try { setTheme(localStorage.getItem('theme') || 'brown'); } catch(e){ setTheme('brown'); }
+
+
+function switchTab(id){
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const map = { 'tab4':0, 'tab2':1, 'tabPdf':2, 'tabMusic':3 };
+  document.querySelectorAll('.tab-btn')[map[id]].classList.add('active');
+}
+</script>
+</body>
+</html>
